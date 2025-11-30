@@ -1,4 +1,6 @@
 #include <Igor/Logging.hpp>
+#include <Igor/MdspanToNpy.hpp>
+#include <Igor/Timer.hpp>
 
 #include "Vector.hpp"
 
@@ -30,28 +32,40 @@ template <typename RHS, typename BCond>
 class ExplicitEuler {
   RHS rhs;
   BCond bcond;
-
   Grid grid;
-  Vector<double> u;
+
   Vector<double> dudt;
 
  public:
+  Vector<double> u;
+
   constexpr ExplicitEuler(Grid grid, RHS rhs, BCond bcond, const Vector<double>& u0)
       : rhs(std::move(rhs)),
         bcond(std::move(bcond)),
         grid(std::move(grid)),
-        u(u0),
-        dudt(grid.N, grid.NGhost) {
+        dudt(grid.N, grid.NGhost),
+        u(u0) {
     IGOR_ASSERT(grid.N == u0.extent(), "Incompatible size of grid and u0");
     IGOR_ASSERT(grid.NGhost == u0.nghost(), "Incompatible size of grid and u0");
   }
 
-  constexpr void do_step(double dt) noexcept {
+  constexpr auto do_step(double dt) noexcept -> double {
     rhs(grid, u, dudt);
     for (Index i = 0; i < u.extent(); ++i) {
       u[i] += dt * dudt[i];
     }
     bcond(u);
+
+    return dt;
+  }
+
+  constexpr void solve(double tend, double dt) noexcept {
+    double t = 0.0;
+    while (t < tend) {
+      dt  = std::min(dt, tend - t);
+      dt  = do_step(dt);
+      t  += dt;
+    }
   }
 };
 
@@ -106,8 +120,19 @@ constexpr auto u_analytical(double x, double t) noexcept -> double {
 }
 
 // =================================================================================================
-auto main() -> int {
-  const Index N      = 10;
+auto main(int argc, char** argv) -> int {
+  Igor::ScopeTimer timer("Solver");
+
+  if (argc < 2) {
+    Igor::Error("Usage: {} <number grid points>", *argv);
+    return 1;
+  }
+
+  const Index N = std::atoi(argv[1]);
+  if (N <= 0) {
+    Igor::Error("Number of grid points must be greater than 0 but is {}", N);
+    return 1;
+  }
   const Index NGhost = 1;
   const double x_min = 0.0;
   const double x_max = 2.0;
@@ -122,8 +147,28 @@ auto main() -> int {
   }
   bcond(u0);
 
-  ExplicitEuler integrator(grid, rhs, bcond, u0);
-  integrator.do_step(0.1);
+  ExplicitEuler solver(grid, rhs, bcond, u0);
+  solver.solve(1.0, 0.5 * grid.dx);
 
-  Igor::Info("Ok!");
+  {
+    constexpr auto x_filename = "output/x.npy";
+    if (!Igor::mdspan_to_npy(std::mdspan(grid.xm.data() + grid.xm.nghost(), grid.xm.extent()),
+                             x_filename)) {
+      return 1;
+    }
+    Igor::Info("Saved grid to `{}`", x_filename);
+
+    constexpr auto u0_filename = "output/u0.npy";
+    if (!Igor::mdspan_to_npy(std::mdspan(u0.data() + u0.nghost(), u0.extent()), u0_filename)) {
+      return 1;
+    }
+    Igor::Info("Saved initial condition to `{}`", u0_filename);
+
+    constexpr auto u_filename = "output/u.npy";
+    if (!Igor::mdspan_to_npy(std::mdspan(solver.u.data() + solver.u.nghost(), solver.u.extent()),
+                             u_filename)) {
+      return 1;
+    }
+    Igor::Info("Saved solution to `{}`", u_filename);
+  }
 }
