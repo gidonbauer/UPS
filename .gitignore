@@ -1,0 +1,8 @@
+.DS_Store
+.cache
+compile_commands.json
+
+*.swp
+*.dSYM
+main
+output/
