@@ -22,11 +22,11 @@ class Vector {
       : m_n(n),
         m_nghost(nghost),
         m_data(static_cast<size_t>(n + 2 * nghost)) {}
-  Vector(const Vector& other) noexcept                              = delete;
-  Vector(Vector&& other) noexcept                                   = default;
-  constexpr auto operator=(const Vector& other) noexcept -> Vector& = delete;
-  constexpr auto operator=(Vector&& other) noexcept -> Vector&      = default;
-  ~Vector() noexcept                                                = default;
+  // Vector(const Vector& other) noexcept                              = default;
+  // Vector(Vector&& other) noexcept                                   = default;
+  // constexpr auto operator=(const Vector& other) noexcept -> Vector& = default;
+  // constexpr auto operator=(Vector&& other) noexcept -> Vector&      = default;
+  // ~Vector() noexcept                                                = default;
 
   [[nodiscard]] constexpr auto operator[](Index idx) noexcept -> Contained& {
     IGOR_ASSERT(idx >= -m_nghost && idx < m_n + m_nghost,
@@ -37,7 +37,7 @@ class Vector {
     return m_data[get_idx(idx)];
   }
 
-  [[nodiscard]] constexpr auto operator()(Index idx) const noexcept -> const Contained& {
+  [[nodiscard]] constexpr auto operator[](Index idx) const noexcept -> const Contained& {
     IGOR_ASSERT(idx >= -m_nghost && idx < m_n + m_nghost,
                 "Index {} is out of bounds for Vector with dimension {}:{}",
                 idx,
