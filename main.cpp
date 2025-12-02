@@ -5,6 +5,7 @@
 #include "BoundaryConditions.hpp"
 #include "Burgers.hpp"
 #include "Grid.hpp"
+#include "Quadrature.hpp"
 #include "TimeIntegrator.hpp"
 #include "Vector.hpp"
 using namespace UPS;
@@ -49,7 +50,9 @@ auto main(int argc, char** argv) -> int {
 
   Vector<double> u0(N, NGhost);
   for (Index i = -NGhost; i < N + NGhost; ++i) {
-    u0[i] = u_analytical(grid.xm[i], 0.0);
+    // u0[i] = u_analytical(grid.xm[i], 0.0);
+    u0[i] = quadrature([](double x) { return u_analytical(x, 0.0); }, grid.x[i], grid.x[i + 1]) /
+            grid.dx;
   }
   bcond(u0);
 
