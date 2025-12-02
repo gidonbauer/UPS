@@ -1,5 +1,4 @@
 #include <numeric>
-#include <vector>
 
 #include <Igor/Logging.hpp>
 #include <Igor/MdspanToNpy.hpp>
@@ -7,6 +6,7 @@
 
 #include "Quadrature.hpp"
 #include "Vector.hpp"
+using namespace UPS;
 
 constexpr auto indicator(double x, double lo, double hi) noexcept -> double {
   return static_cast<double>(lo <= x && x <= hi);

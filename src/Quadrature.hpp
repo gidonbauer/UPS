@@ -1,11 +1,13 @@
-#ifndef FLUID_SOLVER_QUADRATURE_
-#define FLUID_SOLVER_QUADRATURE_
+#ifndef UPS_QUADRATURE_
+#define UPS_QUADRATURE_
 
 #include <numeric>
 
 #include <Igor/Math.hpp>
 
 #include "QuadratureTables.hpp"
+
+namespace UPS {
 
 // -------------------------------------------------------------------------------------------------
 template <size_t N = 16UZ, typename FUNC, typename Float>
@@ -64,4 +66,6 @@ quadrature(FUNC f, Float x_min, Float x_max, Float y_min, Float y_max) noexcept 
   return (x_max - x_min) / 2.0 * (y_max - y_min) / 2.0 * integral;
 }
 
-#endif  // FLUID_SOLVER_QUADRATURE_
+}  // namespace UPS
+
+#endif  // UPS_QUADRATURE_

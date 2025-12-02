@@ -1,11 +1,11 @@
-#ifndef FLUID_SOLVER_QUADRATURE_TABLES_HPP_
-#define FLUID_SOLVER_QUADRATURE_TABLES_HPP_
+#ifndef UPS_QUADRATURE_TABLES_HPP_
+#define UPS_QUADRATURE_TABLES_HPP_
 
 #include <array>
 
 #include "Igor/StaticVector.hpp"
 
-namespace detail {
+namespace UPS::detail {
 
 // Tables taken from: https://pomax.github.io/bezierinfo/legendre-gauss.html
 
@@ -1921,6 +1921,6 @@ inline constexpr std::array<Igor::StaticVector<Float, MAX_QUAD_N>, MAX_QUAD_N> g
     },
 });
 
-}  // namespace detail
+}  // namespace UPS::detail
 
-#endif  // FLUID_SOLVER_QUADRATURE_TABLES_HPP_
+#endif  // UPS_QUADRATURE_TABLES_HPP_

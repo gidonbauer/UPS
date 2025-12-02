@@ -1,9 +1,11 @@
-#ifndef FVM_VECTOR_HPP_
-#define FVM_VECTOR_HPP_
+#ifndef UPS_VECTOR_HPP_
+#define UPS_VECTOR_HPP_
 
 #include <vector>
 
 #include <Igor/Logging.hpp>
+
+namespace UPS {
 
 using Index = int;
 
@@ -54,4 +56,6 @@ class Vector {
   [[nodiscard]] constexpr auto extent() const noexcept -> Index { return m_n; }
 };
 
-#endif  // FVM_VECTOR_HPP_
+}  // namespace UPS
+
+#endif  // UPS_VECTOR_HPP_
