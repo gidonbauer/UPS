@@ -54,7 +54,7 @@ auto main(int argc, char** argv) -> int {
 
   // Burgers::FV_Godunov rhs{};
   Burgers::FV_HighResolution rhs{Burgers::Limiter::SUBPERBEE};
-  // Burgers::FD rhs{};
+  // Burgers::FD_Upwind rhs{};
 
   // DirichletZero bcond{};
   NeumannZero bcond{};

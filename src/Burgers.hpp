@@ -112,7 +112,7 @@ class FV_HighResolution {
 };
 
 // =================================================================================================
-class FD {
+class FD_Upwind {
  public:
   static constexpr void
   operator()(const Grid& grid, const Vector<double>& u, Vector<double>& dudt) noexcept {
