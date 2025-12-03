@@ -60,18 +60,53 @@ class FV_Godunov {
 };
 
 // =================================================================================================
-class FV_FD {
-  static constexpr auto numerical_flux(double u_left, double u_right) noexcept -> double {
+enum class Limiter { MINMOD, SUBPERBEE, VANLEER, KOREN };
+class FV_HighResolution {
+  Limiter m_limiter;
+
+  // Godunov Flux
+  static constexpr auto low_order_flux(double u_left, double u_right) noexcept -> double {
+    if (u_left <= u_right) {
+      // min u in [u_left, u_right] f(u) = 0.5 * u^2
+      if (u_left <= 0.0 && u_right >= 0.0) { return f(0.0); }
+      return f(std::min(std::abs(u_left), std::abs(u_right)));
+    }
+    // max u in [u_right, u_left] f(u) = 0.5 * u^2
+    return f(std::max(std::abs(u_left), std::abs(u_right)));
+  }
+
+  // Lax-Wendroff Flux (?)
+  static constexpr auto high_order_flux(double u_left, double u_right) noexcept -> double {
     return (f(u_right) + f(u_left)) / 2.0;
   }
 
+  [[nodiscard]] constexpr auto limiter(double U_minus, double U, double U_plus) const noexcept
+      -> double {
+    const double r = (U - U_minus) / (U_plus - U);
+
+    switch (m_limiter) {
+      case Limiter::MINMOD:    return std::max(0.0, std::min(1.0, r));
+      case Limiter::SUBPERBEE: return std::max({0.0, std::min(2.0 * r, 1.0), std::min(r, 2.0)});
+      case Limiter::VANLEER:   return (r + std::abs(r)) / (1.0 + std::abs(r));
+      case Limiter::KOREN:     return std::max(0.0, std::min({2.0 * r, (1.0 + 2.0 * r) / 3.0, 2.0}));
+    }
+  }
+
  public:
-  static constexpr void
-  operator()(const Grid& grid, const Vector<double>& u, Vector<double>& dudt) noexcept {
+  constexpr FV_HighResolution(Limiter limiter = Limiter::MINMOD)
+      : m_limiter(limiter) {}
+
+  constexpr void
+  operator()(const Grid& grid, const Vector<double>& u, Vector<double>& dudt) const noexcept {
     for (Index i = 0; i < grid.N; ++i) {
-      const auto F_minus = numerical_flux(u[i - 1], u[i]);
-      const auto F_plus  = numerical_flux(u[i], u[i + 1]);
-      dudt[i]            = -(F_plus - F_minus) / grid.dx;
+      const auto lf_minus = low_order_flux(u[i - 1], u[i]);
+      const auto hf_minus = high_order_flux(u[i - 1], u[i]);
+      const auto lf_plus  = low_order_flux(u[i], u[i + 1]);
+      const auto hf_plus  = high_order_flux(u[i], u[i + 1]);
+
+      const auto F_minus  = lf_minus + limiter(u[i - 2], u[i - 1], u[i]) * (hf_minus - lf_minus);
+      const auto F_plus   = lf_plus + limiter(u[i - 1], u[i], u[i + 1]) * (hf_plus - lf_plus);
+      dudt[i]             = -(F_plus - F_minus) / grid.dx;
     }
   }
 };

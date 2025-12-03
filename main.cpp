@@ -47,19 +47,19 @@ auto main(int argc, char** argv) -> int {
     Igor::Error("Number of grid points must be greater than 0 but is {}", N);
     return 1;
   }
-  const Index NGhost = 1;
+  const Index NGhost = 2;
   const double x_min = 0.0;
   const double x_max = 2.0;
   Grid grid(x_min, x_max, N, NGhost);
 
-  Burgers::FV_Godunov rhs{};
-  // Burgers::FV_FD rhs{};
+  // Burgers::FV_Godunov rhs{};
+  Burgers::FV_HighResolution rhs{Burgers::Limiter::SUBPERBEE};
   // Burgers::FD rhs{};
 
   // DirichletZero bcond{};
   NeumannZero bcond{};
 
-  Burgers::AdjustTimestep adjust_timestep{};
+  Burgers::AdjustTimestep adjust_timestep{0.5};
 
   Vector<double> u0(N, NGhost);
   for (Index i = -NGhost; i < N + NGhost; ++i) {
