@@ -53,7 +53,7 @@ auto main(int argc, char** argv) -> int {
   Grid grid(x_min, x_max, N, NGhost);
 
   // Burgers::FV_Godunov rhs{};
-  Burgers::FV_HighResolution rhs{Burgers::Limiter::SUBPERBEE};
+  Burgers::FV_HighResolution rhs{Burgers::Limiter::SUPERBEE};
   // Burgers::FD_Upwind rhs{};
 
   // DirichletZero bcond{};

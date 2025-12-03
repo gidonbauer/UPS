@@ -60,7 +60,7 @@ class FV_Godunov {
 };
 
 // =================================================================================================
-enum class Limiter { MINMOD, SUBPERBEE, VANLEER, KOREN };
+enum class Limiter { MINMOD, SUPERBEE, VANLEER, KOREN };
 class FV_HighResolution {
   Limiter m_limiter;
 
@@ -85,10 +85,10 @@ class FV_HighResolution {
     const double r = (U - U_minus) / (U_plus - U);
 
     switch (m_limiter) {
-      case Limiter::MINMOD:    return std::max(0.0, std::min(1.0, r));
-      case Limiter::SUBPERBEE: return std::max({0.0, std::min(2.0 * r, 1.0), std::min(r, 2.0)});
-      case Limiter::VANLEER:   return (r + std::abs(r)) / (1.0 + std::abs(r));
-      case Limiter::KOREN:     return std::max(0.0, std::min({2.0 * r, (1.0 + 2.0 * r) / 3.0, 2.0}));
+      case Limiter::MINMOD:   return std::max(0.0, std::min(1.0, r));
+      case Limiter::SUPERBEE: return std::max({0.0, std::min(2.0 * r, 1.0), std::min(r, 2.0)});
+      case Limiter::VANLEER:  return (r + std::abs(r)) / (1.0 + std::abs(r));
+      case Limiter::KOREN:    return std::max(0.0, std::min({2.0 * r, (1.0 + 2.0 * r) / 3.0, 2.0}));
     }
   }
 
