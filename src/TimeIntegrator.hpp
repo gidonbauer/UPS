@@ -61,7 +61,7 @@ class ExplicitEuler final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
   Vector<double> dudt;
 
   constexpr auto do_step(double dt) noexcept -> double override {
-    rhs(grid, u, dudt);
+    rhs(grid, u, dt, dudt);
     for (Index i = 0; i < u.extent(); ++i) {
       u[i] += dt * dudt[i];
     }
@@ -94,7 +94,7 @@ class RungeKutta2 final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
 
   constexpr auto do_step(double dt) noexcept -> double override {
     for (Index step = 0; step < 2; ++step) {
-      rhs(grid, u, dudt);
+      rhs(grid, u, dt, dudt);
       for (Index i = 0; i < u.extent(); ++i) {
         u[i] += 0.5 * dt * dudt[i];
       }
@@ -138,7 +138,7 @@ class SemiImplicitCrankNicolson final : public TimeIntegrator<RHS, BCond, Adjust
       }
 
       // Calc update
-      rhs(grid, u, dudt);
+      rhs(grid, u, dt, dudt);
       // Update values
       for (Index i = 0; i < u.extent(); ++i) {
         u[i] = u_old[i] + dt * dudt[i];

@@ -6,7 +6,7 @@ HEADERS = src/BoundaryConditions.hpp  \
           src/TimeIntegrator.hpp      \
           src/Vector.hpp
 
-TARGETS = main burgers
+TARGETS = main burgers scaling
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23
 
@@ -19,12 +19,19 @@ else
   endif
 endif
 
-IGOR_INC = -I${IGOR_DIR}
+ifdef IGOR_DIR
+  IGOR_INC = -I${IGOR_DIR}
+else
+  ${error "Need to define the path to Igor library in `IGOR_DIR`."}
+endif
 
 all: ${TARGETS}
 
 %: %.cpp ${HEADERS} output
 	${CXX} ${CXX_FLAGS} -Isrc/ ${IGOR_INC} -o $@ $<
+
+scaling: scaling.cpp ${HEADERS} output
+	${CXX} ${CXX_FLAGS} -fopenmp -Isrc/ ${IGOR_INC} -o $@ $<
 
 output:
 	mkdir -p output

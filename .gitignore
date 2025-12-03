@@ -3,7 +3,11 @@
 compile_commands.json
 
 *.swp
+*.csv
 *.dSYM
 main
 burgers
+scaling
+
+python/
 output/
