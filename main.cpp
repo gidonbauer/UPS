@@ -1,3 +1,5 @@
+#include <charconv>
+
 #include <Igor/Logging.hpp>
 #include <Igor/MdspanToNpy.hpp>
 #include <Igor/Timer.hpp>
@@ -30,7 +32,17 @@ auto main(int argc, char** argv) -> int {
     return 1;
   }
 
-  const Index N = std::atoi(argv[1]);
+  const char* N_as_cstr = argv[1];
+  Index N               = 0;
+  const auto [ptr, ec]  = std::from_chars(N_as_cstr, N_as_cstr + std::strlen(N_as_cstr), N, 10);
+  if (ec != std::errc()) {
+    Igor::Error("Could not parse cstring `{}` as integer.", N_as_cstr);
+    return 1;
+  }
+  if (ptr != N_as_cstr + std::strlen(N_as_cstr)) {
+    Igor::Error("Invalid input for N: {}", N_as_cstr);
+    return 1;
+  }
   if (N <= 0) {
     Igor::Error("Number of grid points must be greater than 0 but is {}", N);
     return 1;
@@ -40,7 +52,8 @@ auto main(int argc, char** argv) -> int {
   const double x_max = 2.0;
   Grid grid(x_min, x_max, N, NGhost);
 
-  Burgers::FVM rhs{};
+  Burgers::FV_Godunov rhs{};
+  // Burgers::FV_FD rhs{};
   // Burgers::FD rhs{};
 
   // DirichletZero bcond{};

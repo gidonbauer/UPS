@@ -7,6 +7,8 @@
 
 namespace UPS::Burgers {
 
+constexpr auto f(double u) noexcept -> double { return 0.5 * u * u; }
+
 // =================================================================================================
 class AdjustTimestep {
   double CFL_safety_factor;
@@ -34,9 +36,7 @@ class AdjustTimestep {
 };
 
 // =================================================================================================
-class FVM {
-  static constexpr auto f(double u) noexcept -> double { return 0.5 * u * u; }
-
+class FV_Godunov {
   // From LeVeque: Numerical Methods for Conservation Laws 2nd edition (13.24)
   static constexpr auto godunov_flux(double u_left, double u_right) noexcept -> double {
     if (u_left <= u_right) {
@@ -60,9 +60,24 @@ class FVM {
 };
 
 // =================================================================================================
-class FD {
-  static constexpr auto f(double u) noexcept -> double { return 0.5 * u * u; }
+class FV_FD {
+  static constexpr auto numerical_flux(double u_left, double u_right) noexcept -> double {
+    return (f(u_right) + f(u_left)) / 2.0;
+  }
 
+ public:
+  static constexpr void
+  operator()(const Grid& grid, const Vector<double>& u, Vector<double>& dudt) noexcept {
+    for (Index i = 0; i < grid.N; ++i) {
+      const auto F_minus = numerical_flux(u[i - 1], u[i]);
+      const auto F_plus  = numerical_flux(u[i], u[i + 1]);
+      dudt[i]            = -(F_plus - F_minus) / grid.dx;
+    }
+  }
+};
+
+// =================================================================================================
+class FD {
  public:
   static constexpr void
   operator()(const Grid& grid, const Vector<double>& u, Vector<double>& dudt) noexcept {
