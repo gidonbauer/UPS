@@ -89,6 +89,7 @@ auto main() -> int {
       RUN_SCALING_TEST(ExplicitEuler, FV_Godunov, N + 1);
       RUN_SCALING_TEST(SemiImplicitCrankNicolson, FV_Godunov, N + 1);
       RUN_SCALING_TEST(RungeKutta2, FV_Godunov, N + 1);
+      RUN_SCALING_TEST(RungeKutta4, FV_Godunov, N + 1);
     }
 
 #pragma omp task firstprivate(N)
@@ -96,6 +97,15 @@ auto main() -> int {
       RUN_SCALING_TEST(ExplicitEuler, FD_Upwind, N + 1);
       RUN_SCALING_TEST(SemiImplicitCrankNicolson, FD_Upwind, N + 1);
       RUN_SCALING_TEST(RungeKutta2, FD_Upwind, N + 1);
+      RUN_SCALING_TEST(RungeKutta4, FD_Upwind, N + 1);
+    }
+
+#pragma omp task firstprivate(N)
+    {
+      RUN_SCALING_TEST(ExplicitEuler, LaxWendroff, N + 1);
+      RUN_SCALING_TEST(SemiImplicitCrankNicolson, LaxWendroff, N + 1);
+      RUN_SCALING_TEST(RungeKutta2, LaxWendroff, N + 1);
+      RUN_SCALING_TEST(RungeKutta4, LaxWendroff, N + 1);
     }
 
 #pragma omp task firstprivate(N)
@@ -106,6 +116,8 @@ auto main() -> int {
           "SemiImplicitCrankNicolson", "FV_HighResolution(Minmod)", N + 1, Limiter::MINMOD);
       run_scaling_test<RungeKutta2, FV_HighResolution>(
           "RungeKutta2", "FV_HighResolution(Minmod)", N + 1, Limiter::MINMOD);
+      run_scaling_test<RungeKutta4, FV_HighResolution>(
+          "RungeKutta4", "FV_HighResolution(Minmod)", N + 1, Limiter::MINMOD);
     }
 
 #pragma omp task firstprivate(N)
@@ -116,6 +128,8 @@ auto main() -> int {
           "SemiImplicitCrankNicolson", "FV_HighResolution(Superbee)", N + 1, Limiter::SUPERBEE);
       run_scaling_test<RungeKutta2, FV_HighResolution>(
           "RungeKutta2", "FV_HighResolution(Superbee)", N + 1, Limiter::SUPERBEE);
+      run_scaling_test<RungeKutta4, FV_HighResolution>(
+          "RungeKutta4", "FV_HighResolution(Superbee)", N + 1, Limiter::SUPERBEE);
     }
 
 #pragma omp task firstprivate(N)
@@ -126,6 +140,8 @@ auto main() -> int {
           "SemiImplicitCrankNicolson", "FV_HighResolution(Koren)", N + 1, Limiter::KOREN);
       run_scaling_test<RungeKutta2, FV_HighResolution>(
           "RungeKutta2", "FV_HighResolution(Koren)", N + 1, Limiter::KOREN);
+      run_scaling_test<RungeKutta4, FV_HighResolution>(
+          "RungeKutta4", "FV_HighResolution(Koren)", N + 1, Limiter::KOREN);
     }
   }
 }

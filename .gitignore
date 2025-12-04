@@ -9,5 +9,5 @@ main
 burgers
 scaling
 
-python/
+python/*.ipynb
 output/

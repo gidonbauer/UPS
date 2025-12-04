@@ -138,6 +138,20 @@ class FD_Upwind {
   }
 };
 
+// =================================================================================================
+class LaxWendroff {
+ public:
+  static constexpr void
+  operator()(const Grid& grid, const Vector<double>& u, double dt, Vector<double>& dudt) noexcept {
+    for (Index i = 0; i < grid.N; ++i) {
+      dudt[i] = -(f(u[i + 1]) - f(u[i - 1])) / (2.0 * grid.dx) +  // 2nd order central FD
+                dt / (2.0 * grid.dx * grid.dx) *                  // Numerical diffusion
+                    ((u[i + 1] + u[i]) / 2.0 * (f(u[i + 1]) - f(u[i])) -
+                     (u[i] + u[i - 1]) / 2.0 * (f(u[i]) - f(u[i - 1])));
+    }
+  }
+};
+
 }  // namespace UPS::Burgers
 
 #endif  // UPS_BURGERS_HPP_

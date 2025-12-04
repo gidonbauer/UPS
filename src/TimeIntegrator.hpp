@@ -113,6 +113,66 @@ class RungeKutta2 final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
 
 // =================================================================================================
 template <typename RHS, typename BCond, typename AdjustTimestep>
+class RungeKutta4 final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
+  using TI = TimeIntegrator<RHS, BCond, AdjustTimestep>;
+  using TI::bcond;
+  using TI::grid;
+  using TI::rhs;
+
+ public:
+  using TI::solve;
+  using TI::u;
+
+ private:
+  Vector<double> u_old;
+  Vector<double> k1;
+  Vector<double> k2;
+  Vector<double> k3;
+  Vector<double> k4;
+
+  constexpr auto do_step(double dt) noexcept -> double override {
+    std::copy_n(u.data(), u.size(), u_old.data());
+
+    rhs(grid, u, dt, k1);
+
+    for (Index i = 0; i < u.extent(); ++i) {
+      u[i] = u_old[i] + 0.5 * dt * k1[i];
+    }
+    bcond(u);
+    rhs(grid, u, dt, k2);
+
+    for (Index i = 0; i < u.extent(); ++i) {
+      u[i] = u_old[i] + 0.5 * dt * k2[i];
+    }
+    bcond(u);
+    rhs(grid, u, dt, k3);
+
+    for (Index i = 0; i < u.extent(); ++i) {
+      u[i] = u_old[i] + dt * k3[i];
+    }
+    bcond(u);
+    rhs(grid, u, dt, k4);
+
+    for (Index i = 0; i < u.extent(); ++i) {
+      u[i] = u_old[i] + dt / 6.0 * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]);
+    }
+    bcond(u);
+    return dt;
+  }
+
+ public:
+  constexpr RungeKutta4(
+      Grid grid, RHS rhs, BCond bcond, AdjustTimestep adjust_timestep, const Vector<double>& u0)
+      : TI(std::move(grid), std::move(rhs), std::move(bcond), std::move(adjust_timestep), u0),
+        u_old(u0.extent(), u0.nghost()),
+        k1(u0.extent(), u0.nghost()),
+        k2(u0.extent(), u0.nghost()),
+        k3(u0.extent(), u0.nghost()),
+        k4(u0.extent(), u0.nghost()) {}
+};
+
+// =================================================================================================
+template <typename RHS, typename BCond, typename AdjustTimestep>
 class SemiImplicitCrankNicolson final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
   using TI = TimeIntegrator<RHS, BCond, AdjustTimestep>;
   using TI::bcond;

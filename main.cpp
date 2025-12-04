@@ -53,8 +53,9 @@ auto main(int argc, char** argv) -> int {
   Grid grid(x_min, x_max, N, NGhost);
 
   // Burgers::FV_Godunov rhs{};
-  Burgers::FV_HighResolution rhs{Burgers::Limiter::SUPERBEE};
+  // Burgers::FV_HighResolution rhs{Burgers::Limiter::SUPERBEE};
   // Burgers::FD_Upwind rhs{};
+  Burgers::LaxWendroff rhs{};
 
   // DirichletZero bcond{};
   NeumannZero bcond{};
@@ -70,8 +71,9 @@ auto main(int argc, char** argv) -> int {
   bcond(u0);
 
   // ExplicitEuler solver(grid, rhs, bcond, adjust_timestep, u0);
-  SemiImplicitCrankNicolson solver(grid, rhs, bcond, adjust_timestep, u0, 5);
+  // SemiImplicitCrankNicolson solver(grid, rhs, bcond, adjust_timestep, u0, 5);
   // RungeKutta2 solver(grid, rhs, bcond, adjust_timestep, u0);
+  RungeKutta4 solver(grid, rhs, bcond, adjust_timestep, u0);
   solver.solve(1.0);
 
   {
@@ -81,12 +83,6 @@ auto main(int argc, char** argv) -> int {
       return 1;
     }
     Igor::Info("Saved grid to `{}`", x_filename);
-
-    constexpr auto u0_filename = "output/u0.npy";
-    if (!Igor::mdspan_to_npy(std::mdspan(u0.data() + u0.nghost(), u0.extent()), u0_filename)) {
-      return 1;
-    }
-    Igor::Info("Saved initial condition to `{}`", u0_filename);
 
     constexpr auto u_filename = "output/u.npy";
     if (!Igor::mdspan_to_npy(std::mdspan(solver.u.data() + solver.u.nghost(), solver.u.extent()),
