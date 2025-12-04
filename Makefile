@@ -42,4 +42,7 @@ output:
 clean:
 	rm -fr ${TARGETS} ${addsuffix .dSYM, ${TARGETS}}
 
+allclean: clean
+	rm -fr output
+
 .PHONY: clean

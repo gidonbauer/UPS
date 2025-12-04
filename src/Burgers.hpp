@@ -59,6 +59,8 @@ class FV_Godunov {
       dudt[i]            = -(1.0 / grid.dx) * (F_plus - F_minus);
     }
   }
+
+  static constexpr auto name() noexcept -> std::string { return "FV_Godunov"; }
 };
 
 // =================================================================================================
@@ -115,6 +117,15 @@ class FV_HighResolution {
       dudt[i]             = -(F_plus - F_minus) / grid.dx;
     }
   }
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string {
+    switch (m_limiter) {
+      case Limiter::MINMOD:   return "FV_HighResolution-Minmod";
+      case Limiter::SUPERBEE: return "FV_HighResolution-Superbee";
+      case Limiter::VANLEER:  return "FV_HighResolution-VanLeer";
+      case Limiter::KOREN:    return "FV_HighResolution-Koren";
+    }
+  }
 };
 
 // =================================================================================================
@@ -136,6 +147,8 @@ class FD_Upwind {
       }
     }
   }
+
+  static constexpr auto name() noexcept -> std::string { return "FD_Upwind"; }
 };
 
 // =================================================================================================
@@ -150,6 +163,8 @@ class LaxWendroff {
                      (u[i] + u[i - 1]) / 2.0 * (f(u[i]) - f(u[i - 1])));
     }
   }
+
+  static constexpr auto name() noexcept -> std::string { return "LaxWendroff"; }
 };
 
 }  // namespace UPS::Burgers

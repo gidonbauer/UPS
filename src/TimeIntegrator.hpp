@@ -1,6 +1,8 @@
 #ifndef UPS_TIME_INTEGRATOR_HPP_
 #define UPS_TIME_INTEGRATOR_HPP_
 
+#include <Igor/Logging.hpp>
+
 #include "Grid.hpp"
 #include "Vector.hpp"
 
@@ -43,6 +45,8 @@ class TimeIntegrator {
       t  += dt;
     }
   }
+
+  [[nodiscard]] virtual constexpr auto name() const noexcept -> std::string = 0;
 };
 
 // =================================================================================================
@@ -75,6 +79,10 @@ class ExplicitEuler final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
       Grid grid, RHS rhs, BCond bcond, AdjustTimestep adjust_timestep, const Vector<double>& u0)
       : TI(std::move(grid), std::move(rhs), std::move(bcond), std::move(adjust_timestep), u0),
         dudt(u0.extent(), u0.nghost()) {}
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
+    return "ExplicitEuler";
+  }
 };
 
 // =================================================================================================
@@ -109,6 +117,10 @@ class RungeKutta2 final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
       Grid grid, RHS rhs, BCond bcond, AdjustTimestep adjust_timestep, const Vector<double>& u0)
       : TI(std::move(grid), std::move(rhs), std::move(bcond), std::move(adjust_timestep), u0),
         dudt(u0.extent(), u0.nghost()) {}
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
+    return "RungeKutta2";
+  }
 };
 
 // =================================================================================================
@@ -169,6 +181,10 @@ class RungeKutta4 final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
         k2(u0.extent(), u0.nghost()),
         k3(u0.extent(), u0.nghost()),
         k4(u0.extent(), u0.nghost()) {}
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
+    return "RungeKutta4";
+  }
 };
 
 // =================================================================================================
@@ -223,6 +239,10 @@ class SemiImplicitCrankNicolson final : public TimeIntegrator<RHS, BCond, Adjust
         u_old(u0.extent(), u0.nghost()) {
     IGOR_ASSERT(
         num_subiter > 0, "Number of sub-iterations must be greater than 0 but is {}", num_subiter);
+  }
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
+    return Igor::detail::format("SemiImplicitCrankNicolson-{}", num_subiter);
   }
 };
 

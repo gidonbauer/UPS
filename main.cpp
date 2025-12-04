@@ -76,6 +76,9 @@ auto main(int argc, char** argv) -> int {
   RungeKutta4 solver(grid, rhs, bcond, adjust_timestep, u0);
   solver.solve(1.0);
 
+  Igor::Info("Right-hand side: {}", rhs.name());
+  Igor::Info("Time integration side: {}", solver.name());
+
   {
     constexpr auto x_filename = "output/x.npy";
     if (!Igor::mdspan_to_npy(std::mdspan(grid.xm.data() + grid.xm.nghost(), grid.xm.extent()),
