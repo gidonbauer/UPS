@@ -71,7 +71,6 @@ void run_scaling_test(std::string_view ti_name,
   const auto L1_error = simpsons_rule_1d(abs_diff, x_min, x_max);
 #pragma omp critical
   std::cout << ti_name << ',' << rhs_name << ',' << N << ',' << L1_error << '\n';
-  // Igor::Info("{}, {}, {}: L1 error = {:.6e}", ti_name, rhs_name, N, L1_error);
 }
 
 #define RUN_SCALING_TEST(TI, RHS, ...) run_scaling_test<TI, RHS>(#TI, #RHS, __VA_ARGS__)  // NOLINT
@@ -82,24 +81,24 @@ auto main() -> int {
   std::cout << "TimeIntegrator" << ',' << "RHS" << ',' << 'N' << ',' << "L1_error" << '\n';
 #pragma omp parallel
 #pragma omp single
-  for (Index i = 0; i < 6; ++i) {
+  for (Index i = 0; i < 4; ++i) {
     N *= 10;
 
-#pragma omp task
+#pragma omp task firstprivate(N)
     {
       RUN_SCALING_TEST(ExplicitEuler, FV_Godunov, N + 1);
       RUN_SCALING_TEST(SemiImplicitCrankNicolson, FV_Godunov, N + 1);
       RUN_SCALING_TEST(RungeKutta2, FV_Godunov, N + 1);
     }
 
-#pragma omp task
+#pragma omp task firstprivate(N)
     {
       RUN_SCALING_TEST(ExplicitEuler, FD_Upwind, N + 1);
       RUN_SCALING_TEST(SemiImplicitCrankNicolson, FD_Upwind, N + 1);
       RUN_SCALING_TEST(RungeKutta2, FD_Upwind, N + 1);
     }
 
-#pragma omp task
+#pragma omp task firstprivate(N)
     {
       run_scaling_test<ExplicitEuler, FV_HighResolution>(
           "ExplicitEuler", "FV_HighResolution(Minmod)", N + 1, Limiter::MINMOD);
@@ -109,7 +108,7 @@ auto main() -> int {
           "RungeKutta2", "FV_HighResolution(Minmod)", N + 1, Limiter::MINMOD);
     }
 
-#pragma omp task
+#pragma omp task firstprivate(N)
     {
       run_scaling_test<ExplicitEuler, FV_HighResolution>(
           "ExplicitEuler", "FV_HighResolution(Superbee)", N + 1, Limiter::SUPERBEE);
@@ -119,7 +118,7 @@ auto main() -> int {
           "RungeKutta2", "FV_HighResolution(Superbee)", N + 1, Limiter::SUPERBEE);
     }
 
-#pragma omp task
+#pragma omp task firstprivate(N)
     {
       run_scaling_test<ExplicitEuler, FV_HighResolution>(
           "ExplicitEuler", "FV_HighResolution(Koren)", N + 1, Limiter::KOREN);
