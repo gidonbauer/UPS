@@ -6,7 +6,7 @@ HEADERS = src/BoundaryConditions.hpp  \
           src/TimeIntegrator.hpp      \
           src/Vector.hpp
 
-TARGETS = main burgers scaling
+TARGETS = burgers heat scaling
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23
 

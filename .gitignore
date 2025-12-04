@@ -6,7 +6,7 @@ compile_commands.json
 *.swp
 *.csv
 *.dSYM
-main
+heat
 burgers
 scaling
 
