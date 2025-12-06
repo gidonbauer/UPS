@@ -6,7 +6,7 @@ HEADERS = src/BoundaryConditions.hpp  \
           src/TimeIntegrator.hpp      \
           src/Vector.hpp
 
-TARGETS = burgers heat scaling
+TARGETS = burgers scaling_burgers heat
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23
 
@@ -33,7 +33,7 @@ all: ${TARGETS}
 %: %.cpp ${HEADERS} output
 	${CXX} ${CXX_FLAGS} -Isrc/ ${IGOR_INC} -o $@ $<
 
-scaling: scaling.cpp ${HEADERS} output
+scaling_burgers: scaling_burgers.cpp ${HEADERS} output
 	${CXX} ${CXX_FLAGS} -fopenmp -Isrc/ ${IGOR_INC} -o $@ $<
 
 output:

@@ -1,6 +1,8 @@
 #ifndef UPS_TIME_INTEGRATOR_HPP_
 #define UPS_TIME_INTEGRATOR_HPP_
 
+#include <algorithm>
+
 #include <Igor/Logging.hpp>
 
 #include "Grid.hpp"
@@ -35,15 +37,24 @@ class TimeIntegrator {
     IGOR_ASSERT(grid.NGhost == u0.nghost(), "Incompatible size of grid and u0");
   }
 
-  constexpr void solve(double tend) noexcept {
+  [[nodiscard]] constexpr auto solve(double tend) noexcept -> bool {
     double t  = 0.0;
     double dt = adjust_timestep(grid, u);
     while (t < tend) {
+#ifndef IGOR_NDEBUG
+      if (std::any_of(u.data(), u.data() + u.size(), [](double ui) {
+            return std::isnan(ui) || std::isinf(ui);
+          })) {
+        Igor::Error("Bad solution: u contains NaN or Inf");
+        return false;
+      }
+#endif  // IGOR_NDEBUG
       dt  = adjust_timestep(grid, u);
       dt  = std::min(dt, tend - t);
       dt  = do_step(dt);
       t  += dt;
     }
+    return true;
   }
 
   [[nodiscard]] virtual constexpr auto name() const noexcept -> std::string = 0;

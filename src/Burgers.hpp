@@ -28,9 +28,9 @@ class AdjustTimestep {
         0.0,
         [](double a, double b) { return std::max(a, b); },
         [](double ui) { return std::abs(ui); });
-    IGOR_ASSERT(!std::isnan(abs_max_u) && !std::isinf(abs_max_u),
-                "Bad solution: abs_max_u = {}",
-                abs_max_u);
+    // IGOR_ASSERT(!std::isnan(abs_max_u) && !std::isinf(abs_max_u),
+    //             "Bad solution: abs_max_u = {}",
+    //             abs_max_u);
     return CFL_safety_factor * grid.dx / abs_max_u;
   }
 };

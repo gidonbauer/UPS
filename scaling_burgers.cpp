@@ -1,3 +1,5 @@
+#include <numbers>
+
 #include <Igor/Logging.hpp>
 #include <Igor/MdspanToNpy.hpp>
 
@@ -9,6 +11,11 @@ using namespace UPS;
 using namespace UPS::Burgers;
 
 // = Analytical solution ===========================================================================
+#if 0
+constexpr double X_MIN = 0.0;
+constexpr double X_MAX = 2.0;
+constexpr double T_END = 1.0;
+
 constexpr auto indicator(double x, double lo, double hi) noexcept -> double {
   return static_cast<double>(lo <= x && x <= hi);
 }
@@ -18,6 +25,39 @@ constexpr auto shock_location(double t) noexcept -> double { return std::sqrt(1.
 constexpr auto u_analytical(double x, double t) noexcept -> double {
   return x / (1.0 + t) * indicator(x, 0.0, shock_location(t));
 }
+
+#else
+
+constexpr double X_MIN = 0.0;
+constexpr double X_MAX = 2.0 * std::numbers::pi;
+constexpr double T_END = 0.75;
+
+constexpr auto u_analytical(double x, double t) noexcept -> double {
+  if (std::abs(t) < 1e-8) {
+    return std::sin(x);
+  } else {
+    auto f     = [=](double xi) { return std::sin(xi) * t + xi - x; };
+    auto dfdxi = [=](double xi) { return std::cos(xi) * t + 1.0; };
+
+    double xi  = x;  // (x_max + x_min) / 2.0;
+    Index i;
+    constexpr Index MAX_ITER = 100;
+    constexpr double TOL     = 1e-8;
+    constexpr double RELAX   = 1.0;
+    for (i = 0; i < MAX_ITER && std::abs(f(xi)) > TOL; ++i) {
+      xi -= RELAX * f(xi) / dfdxi(xi);
+    }
+    IGOR_ASSERT(i < MAX_ITER || std::abs(f(xi)) < TOL,
+                "Newton method did not converge for x={:.6e}, t={:.6e}: |f({:.6e})| = {:.6e}.",
+                x,
+                t,
+                xi,
+                std::abs(f(xi)));
+    return std::sin(xi);
+  }
+}
+
+#endif
 // = Analytical solution ===========================================================================
 
 // = Simpson's rule to integrate a function in 1D ==================================================
@@ -41,10 +81,7 @@ template <template <class RHS, class BCond, class AdjustTimestep> class TI,
           typename... RHSArgs>
 void run_scaling_test(Index N, RHSArgs... rhs_args) {
   const Index NGhost = 2;
-  const double x_min = 0.0;
-  const double x_max = 2.0;
-  const double t_end = 1.0;
-  Grid grid(x_min, x_max, N, NGhost);
+  Grid grid(X_MIN, X_MAX, N, NGhost);
 
   RHS rhs(rhs_args...);
   DirichletZero bcond{};
@@ -58,13 +95,16 @@ void run_scaling_test(Index N, RHSArgs... rhs_args) {
   bcond(u0);
 
   TI solver(grid, rhs, bcond, adjust_timestep, u0);
-  solver.solve(1.0);
+  if (!solver.solve(T_END)) {
+    Igor::Error("{}, {}, {} failed.", solver.name(), rhs.name(), N);
+    return;
+  }
 
   Vector<double> abs_diff(N, 0);
   for (Index i = 0; i < N; ++i) {
-    abs_diff[i] = std::abs(solver.u[i] - u_analytical(grid.xm[i], t_end));
+    abs_diff[i] = std::abs(solver.u[i] - u_analytical(grid.xm[i], T_END));
   }
-  const auto L1_error = simpsons_rule_1d(abs_diff, x_min + 0.5 * grid.dx, x_max - 0.5 * grid.dx);
+  const auto L1_error = simpsons_rule_1d(abs_diff, X_MIN + 0.5 * grid.dx, X_MAX - 0.5 * grid.dx);
 
 #define SAVE_SOLUTION
 #ifdef SAVE_SOLUTION

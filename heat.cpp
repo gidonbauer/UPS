@@ -54,10 +54,13 @@ auto main() -> int {
   // SemiImplicitCrankNicolson solver(grid, rhs, bcond, adjust_timestep, u0, 5);
   // RungeKutta2 solver(grid, rhs, bcond, adjust_timestep, u0);
   RungeKutta4 solver(grid, rhs, bcond, adjust_timestep, u0);
-  solver.solve(1.0);
 
   Igor::Info("Right-hand side: {}", rhs.name());
   Igor::Info("Time integration side: {}", solver.name());
+  if (!solver.solve(1.0)) {
+    Igor::Error("Solver failed.");
+    return 1;
+  }
 
   {
     constexpr auto x_filename = "output/x.npy";
