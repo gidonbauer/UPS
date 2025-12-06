@@ -26,8 +26,10 @@ def plot_all(df):
         name = f"{ti2name[ti]}-{rhs2name[rhs]}"
         plt.loglog(sub_df['N'], sub_df['L1_error'], label=name, marker='o')
 
-    plt.loglog(sub_df['N'], 1/sub_df['N'], linestyle='--', color='tab:red')
-    plt.loglog(sub_df['N'], 11/sub_df['N']**2, linestyle='-.', color='tab:red')
+    ylim = plt.ylim()
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0])/sub_df['N'], linestyle='--', color='black')
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0]**2)/sub_df['N']**2, linestyle='-.', color='black')
+    plt.ylim(ylim)
 
     plt.xlabel("Grid size")
     plt.ylabel("L1-error")
@@ -43,8 +45,10 @@ def plot_rhs(df, rhs):
         name = ti
         plt.loglog(sub_df['N'], sub_df['L1_error'], label=name, marker='o')
 
-    plt.loglog(sub_df['N'], 1/sub_df['N'], linestyle='--', color='tab:red')
-    plt.loglog(sub_df['N'], 11/sub_df['N']**2, linestyle='-.', color='tab:red')
+    ylim = plt.ylim()
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0])/sub_df['N'], linestyle='--', color='black')
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0]**2)/sub_df['N']**2, linestyle='-.', color='black')
+    plt.ylim(ylim)
 
     plt.xlabel("Grid size")
     plt.ylabel("L1-error")
@@ -61,8 +65,10 @@ def plot_time_integrator(df, ti):
         name = rhs
         plt.loglog(sub_df['N'], sub_df['L1_error'], label=name, marker='o')
 
-    plt.loglog(sub_df['N'], 1/sub_df['N'], linestyle='--', color='tab:red')
-    plt.loglog(sub_df['N'], 11/sub_df['N']**2, linestyle='-.', color='tab:red')
+    ylim = plt.ylim()
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0])/sub_df['N'], linestyle='--', color='black')
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0]**2)/sub_df['N']**2, linestyle='-.', color='black')
+    plt.ylim(ylim)
 
     plt.xlabel("Grid size")
     plt.ylabel("L1-error")
@@ -78,8 +84,10 @@ def plot_both_fixed(df, ti, rhs):
     sub_df = df.loc[(df["TimeIntegrator"] == ti) & (df["RHS"] == rhs)]
     plt.loglog(sub_df['N'], sub_df['L1_error'], marker='o')
 
-    plt.loglog(sub_df['N'], 1/sub_df['N'], linestyle='--', color='tab:red')
-    plt.loglog(sub_df['N'], 11/sub_df['N']**2, linestyle='-.', color='tab:red')
+    ylim = plt.ylim()
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0])/sub_df['N'], linestyle='--', color='black')
+    plt.loglog(sub_df['N'], (sub_df['L1_error'].iloc[0] * sub_df['N'].iloc[0]**2)/sub_df['N']**2, linestyle='-.', color='black')
+    plt.ylim(ylim)
 
     plt.xlabel("Grid size")
     plt.ylabel("L1-error")
@@ -112,7 +120,7 @@ def main():
             f"Usage: {sys.argv[0]} [-ti time integrator] [-rhs right-hand side] <input csv file>", file=sys.stderr)
         sys.exit(1)
 
-    df = pd.read_csv(input_file)
+    df = pd.read_csv(input_file).sort_values("N")
 
     if len(time_integrator) == 0 and len(rhs) == 0:
         plot_all(df)

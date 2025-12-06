@@ -110,15 +110,22 @@ class RungeKutta2 final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
 
  private:
   Vector<double> dudt;
+  Vector<double> u_old;
 
   constexpr auto do_step(double dt) noexcept -> double override {
-    for (Index step = 0; step < 2; ++step) {
-      rhs(grid, u, dt, dudt);
-      for (Index i = 0; i < u.extent(); ++i) {
-        u[i] += 0.5 * dt * dudt[i];
-      }
-      bcond(u);
+    std::copy_n(u.data(), u.size(), u_old.data());
+
+    rhs(grid, u, dt, dudt);
+    for (Index i = 0; i < u.extent(); ++i) {
+      u[i] = u_old[i] + 0.5 * dt * dudt[i];
     }
+    bcond(u);
+
+    rhs(grid, u, dt, dudt);
+    for (Index i = 0; i < u.extent(); ++i) {
+      u[i] = u_old[i] + dt * dudt[i];
+    }
+    bcond(u);
 
     return dt;
   }
@@ -127,7 +134,8 @@ class RungeKutta2 final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
   constexpr RungeKutta2(
       Grid grid, RHS rhs, BCond bcond, AdjustTimestep adjust_timestep, const Vector<double>& u0)
       : TI(std::move(grid), std::move(rhs), std::move(bcond), std::move(adjust_timestep), u0),
-        dudt(u0.extent(), u0.nghost()) {}
+        dudt(u0.extent(), u0.nghost()),
+        u_old(u0.extent(), u0.nghost()) {}
 
   [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
     return "RungeKutta2";
