@@ -9,6 +9,7 @@ compile_commands.json
 heat
 burgers
 scaling_burgers
+scaling_ode
 
 python/*.ipynb
 output/

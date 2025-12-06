@@ -2,28 +2,41 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import sys
 
-ti2name = {
-    "ExplicitEuler": "EE",
-    "SemiImplicitCrankNicolson-5": "CN(5)",
-    "RungeKutta2": "RK2",
-    "RungeKutta4": "RK4",
-}
+def ti2name(ti):
+    if ti == "ExplicitEuler":
+        return "EE"
+    elif ti == "SemiImplicitCrankNicolson-5":
+        return "CN(5)"
+    elif ti == "RungeKutta2":
+        return "RK2"
+    elif ti == "RungeKutta4":
+        return "RK4"
+    else:
+        return ti
 
-rhs2name = {
-    "FV_Godunov": "FV1",
-    "FD_Upwind": "FD",
-    "LaxWendroff": "LW",
-    "FV_HighResolution-Minmod": "FV2(Minmod)",
-    "FV_HighResolution-Superbee": "FV2(Superbee)",
-    "FV_HighResolution-Koren": "FV2(Koren)",
-}
+
+def rhs2name(rhs):
+    if rhs == "FV_Godunov":
+        return "FV1"
+    elif rhs == "FD_Upwind":
+        return "FD"
+    elif rhs == "LaxWendroff":
+        return "LW"
+    elif rhs == "FV_HighResolution-Minmod":
+        return "FV2(Minmod)"
+    elif rhs == "FV_HighResolution-Superbee":
+        return "FV2(Superbee)"
+    elif rhs == "FV_HighResolution-Koren":
+        return "FV2(Koren)"
+    else:
+        return rhs
 
 
 def plot_all(df):
     plt.figure()
 
     for ((ti, rhs), sub_df) in df.groupby(["TimeIntegrator", "RHS"]):
-        name = f"{ti2name[ti]}-{rhs2name[rhs]}"
+        name = f"{ti2name(ti)}-{rhs2name(rhs)}"
         plt.loglog(sub_df['N'], sub_df['L1_error'], label=name, marker='o')
 
     ylim = plt.ylim()

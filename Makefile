@@ -1,12 +1,13 @@
 HEADERS = src/BoundaryConditions.hpp  \
           src/Burgers.hpp             \
           src/Grid.hpp                \
+          src/Heat.hpp                \
           src/Quadrature.hpp          \
           src/QuadratureTables.hpp    \
           src/TimeIntegrator.hpp      \
           src/Vector.hpp
 
-TARGETS = burgers scaling_burgers heat
+TARGETS = burgers heat scaling_burgers scaling_ode
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23
 
@@ -33,7 +34,7 @@ all: ${TARGETS}
 %: %.cpp ${HEADERS} output
 	${CXX} ${CXX_FLAGS} -Isrc/ ${IGOR_INC} -o $@ $<
 
-scaling_burgers: scaling_burgers.cpp ${HEADERS} output
+scaling_%: scaling_%.cpp ${HEADERS} output
 	${CXX} ${CXX_FLAGS} -fopenmp -Isrc/ ${IGOR_INC} -o $@ $<
 
 output:
