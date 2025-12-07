@@ -79,11 +79,9 @@ class FV_HighResolution {
     return f(std::max(std::abs(u_left), std::abs(u_right)));
   }
 
-  // Lax-Wendroff Flux
-  static constexpr auto
-  high_order_flux(double u_left, double u_right, double dt, double dx) noexcept -> double {
-    const auto u_mid = (f(u_right) + f(u_left)) / 2.0;
-    return u_mid - dt / (2.0 * dx) * (u_mid * (f(u_right) - f(u_left)));
+  // High order flux: Central finite differences (2nd order)
+  static constexpr auto high_order_flux(double u_left, double u_right) noexcept -> double {
+    return (f(u_right) + f(u_left)) / 2.0;
   }
 
   [[nodiscard]] constexpr auto limiter(double U_minus, double U, double U_plus) const noexcept
@@ -104,13 +102,13 @@ class FV_HighResolution {
 
   constexpr void operator()(const Grid& grid,
                             const Vector<double>& u,
-                            double dt,
+                            double /*dt*/,
                             Vector<double>& dudt) const noexcept {
     for (Index i = 0; i < grid.N; ++i) {
       const auto lf_minus = low_order_flux(u[i - 1], u[i]);
-      const auto hf_minus = high_order_flux(u[i - 1], u[i], dt, grid.dx);
+      const auto hf_minus = high_order_flux(u[i - 1], u[i]);
       const auto lf_plus  = low_order_flux(u[i], u[i + 1]);
-      const auto hf_plus  = high_order_flux(u[i], u[i + 1], dt, grid.dx);
+      const auto hf_plus  = high_order_flux(u[i], u[i + 1]);
 
       const auto F_minus  = lf_minus + limiter(u[i - 2], u[i - 1], u[i]) * (hf_minus - lf_minus);
       const auto F_plus   = lf_plus + limiter(u[i - 1], u[i], u[i + 1]) * (hf_plus - lf_plus);
