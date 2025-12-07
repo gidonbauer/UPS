@@ -6,7 +6,7 @@ using namespace UPS;
 
 // = Analytical solution ===========================================================================
 constexpr double T_END = 1.0;
-constexpr double ALPHA = 1.0;
+constexpr double ALPHA = 5.0;
 
 constexpr auto u_analytical(double t) noexcept -> double { return std::exp(ALPHA * t); }
 // = Analytical solution ===========================================================================
