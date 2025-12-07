@@ -11,10 +11,12 @@ using namespace UPS;
 using namespace UPS::Burgers;
 
 // = Analytical solution ===========================================================================
-double x_min                           = 0.0;      // NOLINT
-double x_max                           = 0.0;      // NOLINT
-double t_end                           = 0.0;      // NOLINT
-double (*u_analytical)(double, double) = nullptr;  // NOLINT
+enum class TestCase { NONE, RAMP, SIN };
+TestCase test_case                     = TestCase::NONE;  // NOLINT
+double x_min                           = 0.0;             // NOLINT
+double x_max                           = 0.0;             // NOLINT
+double t_end                           = 0.0;             // NOLINT
+double (*u_analytical)(double, double) = nullptr;         // NOLINT
 
 constexpr auto indicator(double x, double lo, double hi) noexcept -> double {
   return static_cast<double>(lo <= x && x <= hi);
@@ -132,12 +134,14 @@ auto main(int argc, char** argv) -> int {
       x_max        = 2.0;
       t_end        = 1.0;
       u_analytical = &u_analytical_ramp;
+      test_case    = TestCase::RAMP;
       break;
     case '1':
       x_min        = 0.0;
       x_max        = 2.0 * std::numbers::pi;
       t_end        = 0.75;
       u_analytical = &u_analytical_sin;
+      test_case    = TestCase::SIN;
       break;
     default: Igor::Error("Invalid test case `{}`, choices are 0 and 1.", argv[1]); return 1;
   }
@@ -166,7 +170,7 @@ auto main(int argc, char** argv) -> int {
     }
 
 #pragma omp task firstprivate(N)
-    {
+    if (test_case != TestCase::RAMP) {
       run_scaling_test<ExplicitEuler, FD_Upwind2>(N + 1);
       run_scaling_test<SemiImplicitCrankNicolson, FD_Upwind2>(N + 1);
       run_scaling_test<RungeKutta2, FD_Upwind2>(N + 1);
