@@ -11,10 +11,10 @@ using namespace UPS;
 using namespace UPS::Burgers;
 
 // = Analytical solution ===========================================================================
-#if 0
-constexpr double X_MIN = 0.0;
-constexpr double X_MAX = 2.0;
-constexpr double T_END = 1.0;
+double x_min                           = 0.0;      // NOLINT
+double x_max                           = 0.0;      // NOLINT
+double t_end                           = 0.0;      // NOLINT
+double (*u_analytical)(double, double) = nullptr;  // NOLINT
 
 constexpr auto indicator(double x, double lo, double hi) noexcept -> double {
   return static_cast<double>(lo <= x && x <= hi);
@@ -22,17 +22,12 @@ constexpr auto indicator(double x, double lo, double hi) noexcept -> double {
 
 constexpr auto shock_location(double t) noexcept -> double { return std::sqrt(1.0 + t); }
 
-constexpr auto u_analytical(double x, double t) noexcept -> double {
+constexpr auto u_analytical_ramp(double x, double t) noexcept -> double {
   return x / (1.0 + t) * indicator(x, 0.0, shock_location(t));
 }
 
-#else
-
-constexpr double X_MIN = 0.0;
-constexpr double X_MAX = 2.0 * std::numbers::pi;
-constexpr double T_END = 0.75;
-
-constexpr auto u_analytical(double x, double t) noexcept -> double {
+// -------------------------------------------------------------------------------------------------
+constexpr auto u_analytical_sin(double x, double t) noexcept -> double {
   if (std::abs(t) < 1e-8) {
     return std::sin(x);
   } else {
@@ -56,13 +51,11 @@ constexpr auto u_analytical(double x, double t) noexcept -> double {
     return std::sin(xi);
   }
 }
-
-#endif
 // = Analytical solution ===========================================================================
 
 // = Simpson's rule to integrate a function in 1D ==================================================
-[[nodiscard]] constexpr auto
-simpsons_rule_1d(const Vector<double>& f, double x_min, double x_max) noexcept -> double {
+[[nodiscard]] constexpr auto simpsons_rule_1d(const Vector<double>& f, double a, double b) noexcept
+    -> double {
   IGOR_ASSERT(f.extent() > 0 && f.extent() % 2 == 1,
               "Number of points must be an odd number larger than zero");
   const auto N = f.extent() - 1;  // Number of intervals
@@ -71,7 +64,7 @@ simpsons_rule_1d(const Vector<double>& f, double x_min, double x_max) noexcept -
   for (Index i = 1; i <= N / 2; ++i) {
     res += f[2 * i - 2] + 4 * f[2 * i - 1] + f[2 * i];
   }
-  const auto dx = (x_max - x_min) / static_cast<double>(N);
+  const auto dx = (b - a) / static_cast<double>(N);
   return res * dx / 3;
 }
 
@@ -81,7 +74,7 @@ template <template <class RHS, class BCond, class AdjustTimestep> class TI,
           typename... RHSArgs>
 void run_scaling_test(Index N, RHSArgs... rhs_args) {
   const Index NGhost = 2;
-  Grid grid(X_MIN, X_MAX, N, NGhost);
+  Grid grid(x_min, x_max, N, NGhost);
 
   RHS rhs(rhs_args...);
   DirichletZero bcond{};
@@ -95,16 +88,16 @@ void run_scaling_test(Index N, RHSArgs... rhs_args) {
   bcond(u0);
 
   TI solver(grid, rhs, bcond, adjust_timestep, u0);
-  if (!solver.solve(T_END)) {
+  if (!solver.solve(t_end)) {
     Igor::Error("{}, {}, {} failed.", solver.name(), rhs.name(), N);
     return;
   }
 
   Vector<double> abs_diff(N, 0);
   for (Index i = 0; i < N; ++i) {
-    abs_diff[i] = std::abs(solver.u[i] - u_analytical(grid.xm[i], T_END));
+    abs_diff[i] = std::abs(solver.u[i] - u_analytical(grid.xm[i], t_end));
   }
-  const auto L1_error = simpsons_rule_1d(abs_diff, X_MIN + 0.5 * grid.dx, X_MAX - 0.5 * grid.dx);
+  const auto L1_error = simpsons_rule_1d(abs_diff, x_min + 0.5 * grid.dx, x_max - 0.5 * grid.dx);
 
 #define SAVE_SOLUTION
 #ifdef SAVE_SOLUTION
@@ -127,7 +120,27 @@ void run_scaling_test(Index N, RHSArgs... rhs_args) {
   std::cout << solver.name() << ',' << rhs.name() << ',' << N << ',' << L1_error << '\n';
 }
 
-auto main() -> int {
+auto main(int argc, char** argv) -> int {
+  if (argc < 2) {
+    Igor::Error("Usage: {} <test case (0|1)>", argv[0]);
+    return 1;
+  }
+
+  switch (*argv[1]) {
+    case '0':
+      x_min        = 0.0;
+      x_max        = 2.0;
+      t_end        = 1.0;
+      u_analytical = &u_analytical_ramp;
+      break;
+    case '1':
+      x_min        = 0.0;
+      x_max        = 2.0 * std::numbers::pi;
+      t_end        = 0.75;
+      u_analytical = &u_analytical_sin;
+      break;
+    default: Igor::Error("Invalid test case `{}`, choices are 0 and 1.", argv[1]); return 1;
+  }
 
   Index N = 1;
   std::cout << "TimeIntegrator" << ',' << "RHS" << ',' << 'N' << ',' << "L1_error" << '\n';
