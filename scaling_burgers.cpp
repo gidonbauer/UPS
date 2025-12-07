@@ -11,6 +11,7 @@ using namespace UPS;
 using namespace UPS::Burgers;
 
 // = Analytical solution ===========================================================================
+// TODO: Add rarefaction test case
 enum class TestCase { NONE, RAMP, SIN };
 TestCase test_case                     = TestCase::NONE;  // NOLINT
 double x_min                           = 0.0;             // NOLINT

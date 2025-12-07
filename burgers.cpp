@@ -29,7 +29,7 @@ constexpr auto u_analytical(double x, double t) noexcept -> double {
   return x / (1.0 + t) * indicator(x, 0.0, shock_location(t));
 }
 
-#else
+#elif 0
 
 constexpr double x_min = 0.0;
 constexpr double x_max = 2.0 * std::numbers::pi;
@@ -58,6 +58,17 @@ constexpr auto u_analytical(double x, double t) noexcept -> double {
                 std::abs(f(xi)));
     return std::sin(xi);
   }
+}
+
+#else
+
+constexpr double x_min = 0.0;
+constexpr double x_max = 2.0;
+constexpr double t_end = 0.5;
+
+constexpr auto u_analytical(double x, double t) noexcept -> double {
+  IGOR_ASSERT(t == 0.0, "t > 0 is not implemented yet.");
+  return static_cast<double>(x >= 1.0);
 }
 
 #endif
