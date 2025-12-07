@@ -152,6 +152,28 @@ class FD_Upwind {
 };
 
 // =================================================================================================
+class FD_Upwind2 {
+ public:
+  static constexpr void operator()(const Grid& grid,
+                                   const Vector<double>& u,
+                                   double /*dt*/,
+                                   Vector<double>& dudt) noexcept {
+    for (Index i = 0; i < grid.N; ++i) {
+      // 2st order upwind FD
+      if (u[i] >= 0.0) {
+        // 1/2, −4/2, 3/2
+        dudt[i] = -(3.0 * f(u[i]) - 4.0 * f(u[i - 1]) + f(u[i - 2])) / (2.0 * grid.dx);
+      } else {
+        // −3/2, 4/2, −1/2
+        dudt[i] = -(-3.0 * f(u[i]) + 4.0 * f(u[i + 1]) - f(u[i + 2])) / (2.0 * grid.dx);
+      }
+    }
+  }
+
+  static constexpr auto name() noexcept -> std::string { return "FD_Upwind2"; }
+};
+
+// =================================================================================================
 class LaxWendroff {
  public:
   static constexpr void

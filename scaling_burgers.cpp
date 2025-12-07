@@ -154,6 +154,14 @@ auto main() -> int {
 
 #pragma omp task firstprivate(N)
     {
+      run_scaling_test<ExplicitEuler, FD_Upwind2>(N + 1);
+      run_scaling_test<SemiImplicitCrankNicolson, FD_Upwind2>(N + 1);
+      run_scaling_test<RungeKutta2, FD_Upwind2>(N + 1);
+      run_scaling_test<RungeKutta4, FD_Upwind2>(N + 1);
+    }
+
+#pragma omp task firstprivate(N)
+    {
       run_scaling_test<ExplicitEuler, LaxWendroff>(N + 1);
       run_scaling_test<SemiImplicitCrankNicolson, LaxWendroff>(N + 1);
       run_scaling_test<RungeKutta2, LaxWendroff>(N + 1);

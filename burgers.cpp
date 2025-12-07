@@ -127,12 +127,14 @@ auto run_solver_wrapper(std::string rhs, Index N) -> bool {
     return run_solver<TI, Burgers::FV_HighResolution>(N, Burgers::Limiter::KOREN);
   } else if (rhs == "FD_Upwind") {
     return run_solver<TI, Burgers::FD_Upwind>(N);
+  } else if (rhs == "FD_Upwind2") {
+    return run_solver<TI, Burgers::FD_Upwind2>(N);
   } else if (rhs == "LaxWendroff") {
     return run_solver<TI, Burgers::LaxWendroff>(N);
   } else {
     Igor::Error("Invalid right-hand side `{}`, possible choices are FV_Godunov, "
                 "FV_HighResolution-Minmod, FV_HighResolution-Superbee, FV_HighResolution-Koren, "
-                "FD_Upwind, and LaxWendroff.",
+                "FD_Upwind, FD_Upwind2, and LaxWendroff.",
                 rhs);
     return false;
   }
