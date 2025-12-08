@@ -11,8 +11,7 @@ using namespace UPS;
 using namespace UPS::Burgers;
 
 // = Analytical solution ===========================================================================
-// TODO: Add rarefaction test case
-enum class TestCase { NONE, RAMP, SIN };
+enum class TestCase { RAMP, SIN, RAREFACTION, NONE };
 TestCase test_case                     = TestCase::NONE;  // NOLINT
 double x_min                           = 0.0;             // NOLINT
 double x_max                           = 0.0;             // NOLINT
@@ -54,6 +53,21 @@ constexpr auto u_analytical_sin(double x, double t) noexcept -> double {
     return std::sin(xi);
   }
 }
+
+// -------------------------------------------------------------------------------------------------
+constexpr auto u_analytical_rarefaction(double x, double t) noexcept -> double {
+  const auto x0 = 1.0;
+  const auto x1 = 1.0 * t + x0;
+
+  if (x < x0) {
+    return 0.0;
+  } else if (x < x1) {
+    return std::abs(t) > 1e-8 ? (1.0 - 0.0) / (x1 - x0) * (x - x0) : 0.0;
+  } else {
+    return 1.0;
+  }
+}
+
 // = Analytical solution ===========================================================================
 
 // = Simpson's rule to integrate a function in 1D ==================================================
@@ -144,7 +158,14 @@ auto main(int argc, char** argv) -> int {
       u_analytical = &u_analytical_sin;
       test_case    = TestCase::SIN;
       break;
-    default: Igor::Error("Invalid test case `{}`, choices are 0 and 1.", argv[1]); return 1;
+    case '2':
+      x_min        = 0.0;
+      x_max        = 2.0;
+      t_end        = 0.5;
+      u_analytical = &u_analytical_rarefaction;
+      test_case    = TestCase::RAREFACTION;
+      break;
+    default: Igor::Error("Invalid test case `{}`, choices are 0, 1, and 2.", argv[1]); return 1;
   }
 
   Index N = 1;

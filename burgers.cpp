@@ -67,8 +67,16 @@ constexpr double x_max = 2.0;
 constexpr double t_end = 0.5;
 
 constexpr auto u_analytical(double x, double t) noexcept -> double {
-  IGOR_ASSERT(t == 0.0, "t > 0 is not implemented yet.");
-  return static_cast<double>(x >= 1.0);
+  const auto x0 = 1.0;
+  const auto x1 = 1.0 * t + x0;
+
+  if (x < x0) {
+    return 0.0;
+  } else if (x < x1) {
+    return std::abs(t) > 1e-8 ? (1.0 - 0.0) / (x1 - x0) * (x - x0) : 0.0;
+  } else {
+    return 1.0;
+  }
 }
 
 #endif
@@ -85,8 +93,8 @@ auto run_solver(Index N, RHSArgs... rhs_args) -> bool {
 
   RHS rhs(rhs_args...);
 
-  DirichletZero bcond{};
-  // NeumannZero bcond{};
+  // DirichletZero bcond{};
+  NeumannZero bcond{};
 
   Burgers::AdjustTimestep adjust_timestep{0.5};
 
