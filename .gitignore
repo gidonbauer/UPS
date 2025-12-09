@@ -8,6 +8,7 @@ compile_commands.json
 *.dSYM
 heat
 burgers
+scaling_advection
 scaling_burgers
 scaling_ode
 

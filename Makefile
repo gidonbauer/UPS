@@ -1,4 +1,5 @@
-HEADERS = src/BoundaryConditions.hpp  \
+HEADERS = src/Advection.hpp           \
+          src/BoundaryConditions.hpp  \
           src/Burgers.hpp             \
           src/Grid.hpp                \
           src/Heat.hpp                \
@@ -7,7 +8,7 @@ HEADERS = src/BoundaryConditions.hpp  \
           src/TimeIntegrator.hpp      \
           src/Vector.hpp
 
-TARGETS = burgers heat scaling_burgers scaling_ode
+TARGETS = burgers heat scaling_burgers scaling_advection scaling_ode
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23
 
