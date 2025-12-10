@@ -15,8 +15,8 @@ At the moment, all solvers follow a similar form:
 
 ```console
 $ make
-$ ./main 100
-$ python3 ./plot.py
+$ ./burgers RungeKutta2 FV_HighResolution-Superbee 25
+$ python3 python/plot_burgers.py 2 output/x.npy output/u.npy
 ```
 Note: Plotting requires the python libraries numpy, matplotlib, and scipy.
 
