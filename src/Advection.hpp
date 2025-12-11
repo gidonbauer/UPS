@@ -197,8 +197,7 @@ class LaxWendroff {
     for (Index i = 0; i < grid.N; ++i) {
       dudt[i] = -(f(u[i + 1], a) - f(u[i - 1], a)) / (2.0 * grid.dx) +  // 2nd order central FD
                 dt / (2.0 * grid.dx * grid.dx) *                        // Numerical diffusion
-                    ((u[i + 1] + u[i]) / 2.0 * (f(u[i + 1], a) - f(u[i], a)) -
-                     (u[i] + u[i - 1]) / 2.0 * (f(u[i], a) - f(u[i - 1], a)));
+                    (a * (f(u[i + 1], a) - f(u[i], a)) - a * (f(u[i], a) - f(u[i - 1], a)));
     }
   }
 
