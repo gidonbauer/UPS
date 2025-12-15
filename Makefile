@@ -33,9 +33,6 @@ endif
 all: ${TARGETS}
 
 %: %.cpp ${HEADERS} output
-	${CXX} ${CXX_FLAGS} -Isrc/ ${IGOR_INC} -o $@ $<
-
-scaling_%: scaling_%.cpp ${HEADERS} output
 	${CXX} ${CXX_FLAGS} -fopenmp -Isrc/ ${IGOR_INC} -o $@ $<
 
 output:

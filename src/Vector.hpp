@@ -56,6 +56,62 @@ class Vector {
   [[nodiscard]] constexpr auto extent() const noexcept -> Index { return m_n; }
 };
 
+// template <std::floating_point Float>
+// void fma(const Vector<Float>& a,
+//          const Vector<Float>& b,
+//          Float c,
+//          Vector<Float>& res,
+//          bool include_ghost = false) noexcept {
+//   // res = a + c*b
+//   IGOR_ASSERT(a.extent() == b.extent() && a.extent() == res.extent(),
+//               "Incompatible sizes: a.extent() = {}, b.extent() = {}, res.extent() = {}",
+//               a.extent(),
+//               b.extent(),
+//               res.extent());
+//
+//   if (!include_ghost) {
+// #pragma omp parallel for simd
+//     for (Index i = 0; i < res.extent(); ++i) {
+//       res[i] = a[i] + c * b[i];
+//     }
+//   } else {
+//     IGOR_ASSERT(a.size() == b.size() && a.size() == res.size(),
+//                 "Incompatible sizes: a.size() = {}, b.size() = {}, res.size() = {}",
+//                 a.size(),
+//                 b.size(),
+//                 res.size());
+// #pragma omp parallel for simd
+//     for (Index i = -res.nghost(); i < res.extent() + res.nghost(); ++i) {
+//       res[i] = a[i] + c * b[i];
+//     }
+//   }
+// }
+
+template <std::floating_point Float>
+void fma(Vector<Float>& a, const Vector<Float>& b, Float c, bool include_ghost = false) noexcept {
+  // a = a + c*b
+  IGOR_ASSERT(a.extent() == b.extent(),
+              "Incompatible sizes: a.extent() = {}, b.extent() = {}",
+              a.extent(),
+              b.extent());
+
+  if (!include_ghost) {
+#pragma omp parallel for simd
+    for (Index i = 0; i < a.extent(); ++i) {
+      a[i] += c * b[i];
+    }
+  } else {
+    IGOR_ASSERT(a.size() == b.size(),
+                "Incompatible sizes: a.size() = {}, b.size() = {}",
+                a.size(),
+                b.size());
+#pragma omp parallel for simd
+    for (Index i = -a.nghost(); i < a.extent() + a.nghost(); ++i) {
+      a[i] += c * b[i];
+    }
+  }
+}
+
 }  // namespace UPS
 
 #endif  // UPS_VECTOR_HPP_

@@ -77,9 +77,10 @@ class ExplicitEuler final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
 
   constexpr auto do_step(double dt) noexcept -> double override {
     rhs(grid, u, dt, dudt);
-    for (Index i = 0; i < u.extent(); ++i) {
-      u[i] += dt * dudt[i];
-    }
+    fma(u, dudt, dt);
+    // for (Index i = 0; i < u.extent(); ++i) {
+    //   u[i] += dt * dudt[i];
+    // }
     bcond(u);
 
     return dt;
