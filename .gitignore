@@ -10,7 +10,9 @@ heat
 burgers
 scaling_advection
 scaling_burgers
+
 scaling_ode
+free_fall
 
 python/*.ipynb
 output/

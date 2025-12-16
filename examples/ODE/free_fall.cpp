@@ -56,25 +56,29 @@ class FreeFall {
   static constexpr auto name() noexcept -> std::string { return "FreeFall"; }
 };
 
-auto main() -> int {
-  FreeFall rhs{};
-  const double dt    = 1e-1;
-  const double t_end = 3.0;
-
-  UPS::ODE::ExplicitEuler solver(rhs, Vector2{.x = 0.0, .v = 0.0});
-  // UPS::ODE::SemiImplicitCrankNicolson solver(rhs, Vector2{.x = 0.0, .v = 0.0}, 5);
-  // UPS::ODE::RungeKutta2 solver(rhs, Vector2{.x = 0.0, .v = 0.0});
-  // UPS::ODE::RungeKutta4 solver(rhs, Vector2{.x = 0.0, .v = 0.0});
-  if (!solver.solve(dt, t_end)) {
-    Igor::Error("{}-{} failed.", solver.name(), rhs.name());
-    return 1;
+#define RUN(TI)                                                                                    \
+  {                                                                                                \
+    TI solver(rhs, Vector2{.x = 0.0, .v = 0.0});                                                   \
+    if (!solver.solve(dt, t_end)) {                                                                \
+      Igor::Error("{}-{} failed.", solver.name(), rhs.name());                                     \
+      return 1;                                                                                    \
+    }                                                                                              \
+    Igor::Info("{}", solver.name());                                                               \
+    Igor::Info("x({:.1f}) = {:.4f}", t_end, solver.u.x);                                           \
+    Igor::Info("v({:.1f}) = {:.4f}", t_end, solver.u.v);                                           \
+    std::cout << '\n';                                                                             \
   }
 
-  Igor::Info("TimeIntegrator: {}", solver.name());
-  Igor::Info("x({:.1f}) = {:.6e}", t_end, solver.u.x);
-  Igor::Info("v({:.1f}) = {:.6e}", t_end, solver.u.v);
-  std::cout << '\n';
+auto main() -> int {
+  FreeFall rhs{};
+  const double dt    = 0.5;
+  const double t_end = 3.0;
+
+  RUN(UPS::ODE::ExplicitEuler);
+  RUN(UPS::ODE::SemiImplicitCrankNicolson);
+  RUN(UPS::ODE::RungeKutta2);
+  RUN(UPS::ODE::RungeKutta4);
   Igor::Info("Analytical:");
-  Igor::Info("x({:.1f}) = {:.6e}", t_end, u_analytical(t_end).x);
-  Igor::Info("v({:.1f}) = {:.6e}", t_end, u_analytical(t_end).v);
+  Igor::Info("x({:.1f}) = {:.4f}", t_end, u_analytical(t_end).x);
+  Igor::Info("v({:.1f}) = {:.4f}", t_end, u_analytical(t_end).v);
 }
