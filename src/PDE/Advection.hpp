@@ -1,11 +1,9 @@
 #ifndef UPS_ADVECTION_HPP_
 #define UPS_ADVECTION_HPP_
 
-#include <numeric>
-
 #include "Grid.hpp"
 
-namespace UPS::Advection {
+namespace UPS::PDE::Advection {
 
 constexpr auto f(double u, double a) noexcept -> double { return a * u; }
 
@@ -34,7 +32,8 @@ class FV_Godunov {
   double a;
 
   // From LeVeque: Numerical Methods for Conservation Laws 2nd edition (13.24)
-  constexpr auto godunov_flux(double u_left, double u_right) const noexcept -> double {
+  [[nodiscard]] constexpr auto godunov_flux(double u_left, double u_right) const noexcept
+      -> double {
     if (u_left <= u_right) {
       // min u in [u_left, u_right]
       return f(std::min(u_left, u_right), a);
@@ -204,6 +203,6 @@ class LaxWendroff {
   static constexpr auto name() noexcept -> std::string { return "LaxWendroff"; }
 };
 
-}  // namespace UPS::Advection
+}  // namespace UPS::PDE::Advection
 
 #endif  // UPS_ADVECTION_HPP_

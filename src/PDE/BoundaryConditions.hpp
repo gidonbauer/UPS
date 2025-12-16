@@ -1,9 +1,9 @@
 #ifndef UPS_BOUNDARY_CONDITIONS_HPP_
 #define UPS_BOUNDARY_CONDITIONS_HPP_
 
-#include "Vector.hpp"
+#include "Common/Vector.hpp"
 
-namespace UPS {
+namespace UPS::PDE {
 
 // =================================================================================================
 class DirichletZero {
@@ -31,6 +31,6 @@ class NeumannZero {
   }
 };
 
-}  // namespace UPS
+}  // namespace UPS::PDE
 
 #endif  // UPS_BOUNDARY_CONDITIONS_HPP_

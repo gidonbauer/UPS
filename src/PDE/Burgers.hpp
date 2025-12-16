@@ -5,7 +5,7 @@
 
 #include "Grid.hpp"
 
-namespace UPS::Burgers {
+namespace UPS::PDE::Burgers {
 
 constexpr auto f(double u) noexcept -> double { return 0.5 * u * u; }
 
@@ -187,6 +187,6 @@ class LaxWendroff {
   static constexpr auto name() noexcept -> std::string { return "LaxWendroff"; }
 };
 
-}  // namespace UPS::Burgers
+}  // namespace UPS::PDE::Burgers
 
 #endif  // UPS_BURGERS_HPP_

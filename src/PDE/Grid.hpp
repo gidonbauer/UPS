@@ -1,9 +1,9 @@
 #ifndef UPS_GRID_HPP_
 #define UPS_GRID_HPP_
 
-#include "Vector.hpp"
+#include "Common/Vector.hpp"
 
-namespace UPS {
+namespace UPS::PDE {
 
 // =================================================================================================
 struct Grid {
@@ -28,6 +28,6 @@ struct Grid {
   }
 };
 
-}  // namespace UPS
+}  // namespace UPS::PDE
 
 #endif  // UPS_GRID_HPP_

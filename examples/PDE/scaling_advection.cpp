@@ -1,12 +1,10 @@
 #include <Igor/Logging.hpp>
 #include <Igor/MdspanToNpy.hpp>
 
-#include "Advection.hpp"
-#include "BoundaryConditions.hpp"
-#include "Quadrature.hpp"
-#include "TimeIntegrator.hpp"
+#include "UPS.hpp"
 using namespace UPS;
-using namespace UPS::Advection;
+using namespace UPS::PDE;
+using namespace UPS::PDE::Advection;
 
 // = Analytical solution ===========================================================================
 constexpr double x_min = 0.0;

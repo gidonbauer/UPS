@@ -1,14 +1,20 @@
-HEADERS = src/Advection.hpp           \
-          src/BoundaryConditions.hpp  \
-          src/Burgers.hpp             \
-          src/Grid.hpp                \
-          src/Heat.hpp                \
-          src/Quadrature.hpp          \
-          src/QuadratureTables.hpp    \
-          src/TimeIntegrator.hpp      \
-          src/Vector.hpp
+HEADERS = src/Common/Quadrature.hpp \
+          src/Common/QuadratureTables.hpp \
+          src/Common/Vector.hpp \
+          src/PDE/Advection.hpp \
+          src/PDE/BoundaryConditions.hpp \
+          src/PDE/Burgers.hpp \
+          src/PDE/Grid.hpp \
+          src/PDE/Heat.hpp \
+          src/PDE/TimeIntegrator.hpp \
+          src/ODE/TimeIntegrator.hpp
 
-TARGETS = burgers heat scaling_burgers scaling_advection scaling_ode
+TARGETS = examples/PDE/burgers \
+          examples/PDE/heat \
+          examples/PDE/scaling_burgers \
+          examples/PDE/scaling_advection \
+          examples/ODE/scaling_ode \
+          examples/ODE/free_fall
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23
 

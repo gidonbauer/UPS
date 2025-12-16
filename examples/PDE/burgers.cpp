@@ -5,13 +5,9 @@
 #include <Igor/MdspanToNpy.hpp>
 #include <Igor/Timer.hpp>
 
-#include "BoundaryConditions.hpp"
-#include "Burgers.hpp"
-#include "Grid.hpp"
-#include "Quadrature.hpp"
-#include "TimeIntegrator.hpp"
-#include "Vector.hpp"
+#include "UPS.hpp"
 using namespace UPS;
+using namespace UPS::PDE;
 
 // =================================================================================================
 #if 0

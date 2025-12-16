@@ -4,13 +4,9 @@
 #include <Igor/MdspanToNpy.hpp>
 #include <Igor/Timer.hpp>
 
-#include "BoundaryConditions.hpp"
-#include "Grid.hpp"
-#include "Heat.hpp"
-#include "Quadrature.hpp"
-#include "TimeIntegrator.hpp"
-#include "Vector.hpp"
+#include "UPS.hpp"
 using namespace UPS;
+using namespace UPS::PDE;
 
 // = One possible analytical solution for Neumann boundary conditions with derivative zero =========
 [[nodiscard]] constexpr auto

@@ -94,21 +94,16 @@ void fma(Vector<Float>& a, const Vector<Float>& b, Float c, bool include_ghost =
               "Incompatible sizes: a.extent() = {}, b.extent() = {}",
               a.extent(),
               b.extent());
+  IGOR_ASSERT(!include_ghost || a.size() == b.size(),
+              "Incompatible sizes: a.size() = {}, b.size() = {}",
+              a.size(),
+              b.size());
 
-  if (!include_ghost) {
+  const Index imin = include_ghost ? -a.nghost() : 0;
+  const Index imax = include_ghost ? a.extent() + a.nghost() : a.extent();
 #pragma omp parallel for simd
-    for (Index i = 0; i < a.extent(); ++i) {
-      a[i] += c * b[i];
-    }
-  } else {
-    IGOR_ASSERT(a.size() == b.size(),
-                "Incompatible sizes: a.size() = {}, b.size() = {}",
-                a.size(),
-                b.size());
-#pragma omp parallel for simd
-    for (Index i = -a.nghost(); i < a.extent() + a.nghost(); ++i) {
-      a[i] += c * b[i];
-    }
+  for (Index i = imin; i < imax; ++i) {
+    a[i] += c * b[i];
   }
 }
 

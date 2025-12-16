@@ -1,8 +1,9 @@
 #include <Igor/Logging.hpp>
 #include <Igor/MdspanToNpy.hpp>
 
-#include "TimeIntegrator.hpp"
+#include "UPS.hpp"
 using namespace UPS;
+using namespace UPS::ODE;
 
 // = Analytical solution ===========================================================================
 constexpr double T_END = 1.0;
@@ -14,56 +15,27 @@ constexpr auto u_analytical(double t) noexcept -> double { return std::exp(ALPHA
 // =================================================================================================
 class RHS {
  public:
-  static constexpr void operator()(const Grid& /*grid*/,
-                                   const Vector<double>& u,
-                                   double /*dt*/,
-                                   Vector<double>& dudt) noexcept {
-    IGOR_ASSERT(u.size() == 1, "Expected size one");
-    dudt[0] = ALPHA * u[0];
+  static constexpr void operator()(double u, double /*dt*/, double& dudt) noexcept {
+    dudt = ALPHA * u;
   }
 
   static constexpr auto name() noexcept -> std::string { return "ODE"; }
 };
 
-class NoopBcond {
- public:
-  static constexpr void operator()(Vector<double>& /*u*/) {}
-};
-
-class ConstantTimestep {
-  double dt;
-
- public:
-  constexpr ConstantTimestep(double dt)
-      : dt(dt) {
-    IGOR_ASSERT(dt > 0.0, "dt must be greater than 0 but is {:.6e}", dt);
-  }
-
-  constexpr auto operator()(const Grid& /*grid*/, const Vector<double>& /*u*/) const noexcept
-      -> double {
-    return dt;
-  }
-};
-
 // =================================================================================================
-template <template <class RHS, class BCond, class AdjustTimestep> class TI>
+template <template <class State, class RHS> class TI>
 void run_scaling_test(Index N) {
-  Grid grid(0.0, 0.0, 1, 0);
-
   RHS rhs{};
-  NoopBcond bcond{};
-  ConstantTimestep adjust_timestep(1.0 / static_cast<double>(N));
+  const double dt = 1.0 / static_cast<double>(N);
+  double u0       = u_analytical(0.0);
 
-  Vector<double> u0(1, 0);
-  u0[0] = u_analytical(0.0);
-
-  TI solver(grid, rhs, bcond, adjust_timestep, u0);
-  if (!solver.solve(T_END)) {
+  TI solver(rhs, u0);
+  if (!solver.solve(dt, T_END)) {
     Igor::Error("{}, {}, {} failed.", solver.name(), rhs.name(), N);
     return;
   }
 
-  const auto L1_error = std::abs(solver.u[0] - u_analytical(T_END));
+  const auto L1_error = std::abs(solver.u - u_analytical(T_END));
 
 #pragma omp critical
   std::cout << solver.name() << ',' << rhs.name() << ',' << N << ',' << L1_error << '\n';

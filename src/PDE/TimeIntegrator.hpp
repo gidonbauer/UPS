@@ -5,10 +5,10 @@
 
 #include <Igor/Logging.hpp>
 
-#include "Grid.hpp"
-#include "Vector.hpp"
+#include "Common/Vector.hpp"
+#include "PDE/Grid.hpp"
 
-namespace UPS {
+namespace UPS::PDE {
 
 // =================================================================================================
 template <typename RHS, typename BCond, typename AdjustTimestep>
@@ -266,6 +266,6 @@ class SemiImplicitCrankNicolson final : public TimeIntegrator<RHS, BCond, Adjust
   }
 };
 
-}  // namespace UPS
+}  // namespace UPS::PDE
 
 #endif  // UPS_TIME_INTEGRATOR_HPP_

@@ -5,7 +5,7 @@
 
 #include "Grid.hpp"
 
-namespace UPS::Heat {
+namespace UPS::PDE::Heat {
 
 // =================================================================================================
 class AdjustTimestep {
@@ -76,6 +76,6 @@ class FD_Central4 {
   static constexpr auto name() noexcept -> std::string { return "FD_Central4"; }
 };
 
-}  // namespace UPS::Heat
+}  // namespace UPS::PDE::Heat
 
 #endif  // UPS_HEAT_HPP_
