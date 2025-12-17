@@ -18,6 +18,12 @@ struct Vector2 {
   return lhs;
 }
 
+constexpr auto operator-(Vector2 lhs, const Vector2& rhs) noexcept -> Vector2 {
+  lhs.x -= rhs.x;
+  lhs.v -= rhs.v;
+  return lhs;
+}
+
 constexpr auto operator+(Vector2 lhs, const Vector2& rhs) noexcept -> Vector2 {
   lhs.x += rhs.x;
   lhs.v += rhs.v;
@@ -78,6 +84,7 @@ auto main() -> int {
   RUN(UPS::ODE::SemiImplicitCrankNicolson);
   RUN(UPS::ODE::RungeKutta2);
   RUN(UPS::ODE::RungeKutta4);
+  RUN(UPS::ODE::AdamsBashforth);
   Igor::Info("Analytical:");
   Igor::Info("x({:.1f}) = {:.4f}", t_end, u_analytical(t_end).x);
   Igor::Info("v({:.1f}) = {:.4f}", t_end, u_analytical(t_end).v);

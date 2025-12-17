@@ -179,6 +179,7 @@ auto main(int argc, char** argv) -> int {
       run_scaling_test<SemiImplicitCrankNicolson, FV_Godunov>(N + 1);
       run_scaling_test<RungeKutta2, FV_Godunov>(N + 1);
       run_scaling_test<RungeKutta4, FV_Godunov>(N + 1);
+      run_scaling_test<AdamsBashforth, FV_Godunov>(N + 1);
     }
 
 #pragma omp task firstprivate(N)
@@ -187,6 +188,7 @@ auto main(int argc, char** argv) -> int {
       run_scaling_test<SemiImplicitCrankNicolson, FD_Upwind>(N + 1);
       run_scaling_test<RungeKutta2, FD_Upwind>(N + 1);
       run_scaling_test<RungeKutta4, FD_Upwind>(N + 1);
+      run_scaling_test<AdamsBashforth, FD_Upwind>(N + 1);
     }
 
 #pragma omp task firstprivate(N)
@@ -195,6 +197,7 @@ auto main(int argc, char** argv) -> int {
       run_scaling_test<SemiImplicitCrankNicolson, FD_Upwind2>(N + 1);
       run_scaling_test<RungeKutta2, FD_Upwind2>(N + 1);
       run_scaling_test<RungeKutta4, FD_Upwind2>(N + 1);
+      run_scaling_test<AdamsBashforth, FD_Upwind2>(N + 1);
     }
 
 #pragma omp task firstprivate(N)
@@ -203,6 +206,7 @@ auto main(int argc, char** argv) -> int {
       run_scaling_test<SemiImplicitCrankNicolson, LaxWendroff>(N + 1);
       run_scaling_test<RungeKutta2, LaxWendroff>(N + 1);
       run_scaling_test<RungeKutta4, LaxWendroff>(N + 1);
+      run_scaling_test<AdamsBashforth, LaxWendroff>(N + 1);
     }
 
 #pragma omp task firstprivate(N)
@@ -211,6 +215,7 @@ auto main(int argc, char** argv) -> int {
       run_scaling_test<SemiImplicitCrankNicolson, FV_HighResolution>(N + 1, Limiter::MINMOD);
       run_scaling_test<RungeKutta2, FV_HighResolution>(N + 1, Limiter::MINMOD);
       run_scaling_test<RungeKutta4, FV_HighResolution>(N + 1, Limiter::MINMOD);
+      run_scaling_test<AdamsBashforth, FV_HighResolution>(N + 1, Limiter::MINMOD);
     }
 
 #pragma omp task firstprivate(N)
@@ -219,6 +224,7 @@ auto main(int argc, char** argv) -> int {
       run_scaling_test<SemiImplicitCrankNicolson, FV_HighResolution>(N + 1, Limiter::SUPERBEE);
       run_scaling_test<RungeKutta2, FV_HighResolution>(N + 1, Limiter::SUPERBEE);
       run_scaling_test<RungeKutta4, FV_HighResolution>(N + 1, Limiter::SUPERBEE);
+      run_scaling_test<AdamsBashforth, FV_HighResolution>(N + 1, Limiter::SUPERBEE);
     }
 
 #pragma omp task firstprivate(N)
@@ -227,6 +233,7 @@ auto main(int argc, char** argv) -> int {
       run_scaling_test<SemiImplicitCrankNicolson, FV_HighResolution>(N + 1, Limiter::KOREN);
       run_scaling_test<RungeKutta2, FV_HighResolution>(N + 1, Limiter::KOREN);
       run_scaling_test<RungeKutta4, FV_HighResolution>(N + 1, Limiter::KOREN);
+      run_scaling_test<AdamsBashforth, FV_HighResolution>(N + 1, Limiter::KOREN);
     }
   }
 }
