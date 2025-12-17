@@ -26,7 +26,7 @@ class TimeIntegrator {
       : rhs(std::move(rhs)),
         u(u0) {}
 
-  [[nodiscard]] constexpr auto solve(double dt, double tend) noexcept -> bool {
+  [[nodiscard]] virtual constexpr auto solve(double dt, double tend) noexcept -> bool {
     double t = 0.0;
     while (t < tend) {
       // #ifndef IGOR_NDEBUG
