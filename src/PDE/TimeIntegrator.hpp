@@ -266,6 +266,47 @@ class SemiImplicitCrankNicolson final : public TimeIntegrator<RHS, BCond, Adjust
   }
 };
 
+// =================================================================================================
+template <typename RHS, typename BCond, typename AdjustTimestep>
+class AdamsBashforth final : public TimeIntegrator<RHS, BCond, AdjustTimestep> {
+  using TI = TimeIntegrator<RHS, BCond, AdjustTimestep>;
+  using TI::bcond;
+  using TI::grid;
+  using TI::rhs;
+
+ public:
+  using TI::solve;
+  using TI::u;
+
+ private:
+  Vector<double> u_prev;
+  Vector<double> dudt_prev;
+  Vector<double> dudt;
+
+  constexpr auto do_step(double dt) noexcept -> double override {
+    rhs(grid, u_prev, dt, dudt_prev);
+    rhs(grid, u, dt, dudt);
+    std::copy_n(u.data(), u.size(), u_prev.data());
+    for (Index i = 0; i < u.extent(); ++i) {
+      u[i] += dt * (1.5 * dudt[i] - 0.5 * dudt_prev[i]);
+    }
+    bcond(u);
+    return dt;
+  }
+
+ public:
+  constexpr AdamsBashforth(
+      Grid grid, RHS rhs, BCond bcond, AdjustTimestep adjust_timestep, const Vector<double>& u0)
+      : TI(std::move(grid), std::move(rhs), std::move(bcond), std::move(adjust_timestep), u0),
+        u_prev(u0.extent(), u0.nghost()),
+        dudt_prev(u0.extent(), u0.nghost()),
+        dudt(u0.extent(), u0.nghost()) {}
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
+    return "AdamsBashforth";
+  }
+};
+
 }  // namespace UPS::PDE
 
 #endif  // UPS_TIME_INTEGRATOR_HPP_
