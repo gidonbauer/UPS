@@ -192,6 +192,39 @@ class SemiImplicitCrankNicolson final : public TimeIntegrator<State, RHS> {
   }
 };
 
+// =================================================================================================
+template <typename State, typename RHS>
+class AdamsBashforth final : public TimeIntegrator<State, RHS> {
+  using TI = TimeIntegrator<State, RHS>;
+  using TI::rhs;
+
+ public:
+  using TI::solve;
+  using TI::u;
+
+ private:
+  State u_prev{};
+  State dudt_prev{};
+  State dudt{};
+
+  constexpr auto do_step(double dt) noexcept -> double override {
+    rhs(u_prev, dt, dudt_prev);
+    rhs(u, dt, dudt);
+    u_prev  = u;
+    u      += dt * (1.5 * dudt - 0.5 * dudt_prev);
+    return dt;
+  }
+
+ public:
+  constexpr AdamsBashforth(RHS rhs, const State& u0)
+      : TI(std::move(rhs), u0),
+        u_prev(u0) {}
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
+    return "AdamsBashforth";
+  }
+};
+
 }  // namespace UPS::ODE
 
 #endif  // UPS_TIME_INTEGRATOR_HPP_

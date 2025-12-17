@@ -18,6 +18,12 @@ struct Vector2 {
   return lhs;
 }
 
+constexpr auto operator-(Vector2 lhs, const Vector2& rhs) noexcept -> Vector2 {
+  lhs.x -= rhs.x;
+  lhs.v -= rhs.v;
+  return lhs;
+}
+
 constexpr auto operator+(Vector2 lhs, const Vector2& rhs) noexcept -> Vector2 {
   lhs.x += rhs.x;
   lhs.v += rhs.v;
@@ -61,10 +67,11 @@ auto main() -> int {
   const double dt    = 1e-1;
   const double t_end = 3.0;
 
-  UPS::ODE::ExplicitEuler solver(rhs, Vector2{.x = 0.0, .v = 0.0});
+  // UPS::ODE::ExplicitEuler solver(rhs, Vector2{.x = 0.0, .v = 0.0});
   // UPS::ODE::SemiImplicitCrankNicolson solver(rhs, Vector2{.x = 0.0, .v = 0.0}, 5);
   // UPS::ODE::RungeKutta2 solver(rhs, Vector2{.x = 0.0, .v = 0.0});
   // UPS::ODE::RungeKutta4 solver(rhs, Vector2{.x = 0.0, .v = 0.0});
+  UPS::ODE::AdamsBashforth solver(rhs, Vector2{.x = 0.0, .v = 0.0});
   if (!solver.solve(dt, t_end)) {
     Igor::Error("{}-{} failed.", solver.name(), rhs.name());
     return 1;

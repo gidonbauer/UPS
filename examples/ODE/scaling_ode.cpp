@@ -56,6 +56,7 @@ auto main() -> int {
       run_scaling_test<SemiImplicitCrankNicolson>(N);
       run_scaling_test<RungeKutta2>(N);
       run_scaling_test<RungeKutta4>(N);
+      run_scaling_test<AdamsBashforth>(N);
     }
   }
 }
