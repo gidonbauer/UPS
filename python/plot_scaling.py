@@ -11,6 +11,8 @@ def ti2name(ti):
         return "RK2"
     elif ti == "RungeKutta4":
         return "RK4"
+    elif ti == "AdamsBashforth":
+        return "AB"
     else:
         return ti
 
