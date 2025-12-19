@@ -13,6 +13,7 @@ scaling_burgers
 
 scaling_ode
 free_fall
+kepler_orbit
 
 python/*.ipynb
 output/

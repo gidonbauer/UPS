@@ -14,7 +14,8 @@ TARGETS = examples/PDE/burgers \
           examples/PDE/scaling_burgers \
           examples/PDE/scaling_advection \
           examples/ODE/scaling_ode \
-          examples/ODE/free_fall
+          examples/ODE/free_fall \
+          examples/ODE/kepler_orbit
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23
 
