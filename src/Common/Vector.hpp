@@ -88,7 +88,8 @@ class Vector {
 // }
 
 template <std::floating_point Float>
-void fma(Vector<Float>& a, const Vector<Float>& b, Float c, bool include_ghost = false) noexcept {
+void fma(Vector<Float>& a, const Vector<Float>& b, Float c, bool include_ghost = false) noexcept
+{
   // a <- a + c*b
   IGOR_ASSERT(a.extent() == b.extent(),
               "Incompatible sizes: a.extent() = {}, b.extent() = {}",
@@ -101,7 +102,7 @@ void fma(Vector<Float>& a, const Vector<Float>& b, Float c, bool include_ghost =
 
   const Index imin = include_ghost ? -a.nghost() : 0;
   const Index imax = include_ghost ? a.extent() + a.nghost() : a.extent();
-  // #pragma omp parallel for simd
+#pragma omp parallel for simd
   for (Index i = imin; i < imax; ++i) {
     a[i] += c * b[i];
   }
