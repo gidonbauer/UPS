@@ -277,7 +277,10 @@ class SymplecticEuler final : public UPS::ODE::TimeIntegrator<State, RHS> {
 // =================================================================================================
 template <typename Solution>
 auto save_solution(const std::string& filename, const std::vector<Solution>& sol) -> bool {
-  static_assert(sizeof(Solution) == 7 * sizeof(double));
+  constexpr size_t NUM_ELEM = 7;
+  static_assert(std::is_same_v<decltype(sol[0].t), double>);
+  static_assert(sizeof(Solution) == NUM_ELEM * sizeof(double));
+#if 0
   std::vector<double> data(7 * sol.size());
   for (size_t i = 0; i < sol.size(); ++i) {
     data[7 * i + 0] = sol[i].t;
@@ -288,9 +291,15 @@ auto save_solution(const std::string& filename, const std::vector<Solution>& sol
     data[7 * i + 5] = sol[i].u.v;
     data[7 * i + 6] = sol[i].u.w;
   }
-  return Igor::mdspan_to_npy(std::mdspan(data.data(), sol.size(), 7), filename);
+  return Igor::mdspan_to_npy(std::mdspan(data.data(), sol.size(), NUM_ELEM), filename);
+#else
+  IGOR_ASSERT(static_cast<const void*>(sol.data()) == static_cast<const void*>(&sol[0].t),
+              "Invalid layout of struct `Solution`.");
+  return Igor::mdspan_to_npy(std::mdspan(&sol[0].t, sol.size(), NUM_ELEM), filename);
+#endif
 }
 
+// =================================================================================================
 template <template <class State, class RHS> class TI>
 void run(Gravity rhs, State u0, double tend, double dt) {
   TI solver(rhs, u0);
