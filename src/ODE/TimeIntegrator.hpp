@@ -26,6 +26,8 @@ class TimeIntegrator {
  protected:
   [[nodiscard]] constexpr auto should_save(double t, double dt, double dt_write, double t_end)
       -> bool {
+    if (dt_write <= 0.0) { return true; }
+
     constexpr double DT_SAFE     = 1e-6;
     static double last_save_t    = -1.0;
 

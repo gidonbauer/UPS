@@ -203,6 +203,76 @@ class LeapFrog final : public UPS::ODE::TimeIntegrator<State, RHS> {
   [[nodiscard]] constexpr auto name() const noexcept -> std::string override { return "LeapFrog"; }
 };
 
+// =================================================================================================
+template <typename State, typename RHS>
+class SymplecticEuler final : public UPS::ODE::TimeIntegrator<State, RHS> {
+  using TI = UPS::ODE::TimeIntegrator<State, RHS>;
+  using TI::rhs;
+  using TI::should_save;
+
+ public:
+  using TI::solve;
+  using TI::u;
+  using typename TI::Solution;
+
+ private:
+  State dudt{};
+
+  constexpr auto do_step(double /*dt*/) noexcept -> double override { Igor::Panic("Unreachable."); }
+
+ public:
+  constexpr SymplecticEuler(RHS rhs, const State& u0)
+      : TI(std::move(rhs), u0) {}
+
+  [[nodiscard]] constexpr auto solve(double dt, double tend) noexcept -> bool override {
+    double t = 0.0;
+    while (t < tend) {
+      dt = std::min(dt, tend - t);
+
+      rhs(u, dt, dudt);
+      u.u += dt * dudt.u;
+      u.v += dt * dudt.v;
+      u.w += dt * dudt.w;
+
+      u.x += dt * u.u;
+      u.y += dt * u.v;
+      u.z += dt * u.w;
+
+      t   += dt;
+    }
+
+    return true;
+  }
+
+  [[nodiscard]] constexpr auto
+  solve(double dt, double tend, double dt_write, std::vector<Solution>& solution) noexcept
+      -> bool override {
+    double t = 0.0;
+    while (t < tend) {
+      dt = std::min(dt, tend - t);
+
+      rhs(u, dt, dudt);
+      u.u += dt * dudt.u;
+      u.v += dt * dudt.v;
+      u.w += dt * dudt.w;
+
+      u.x += dt * u.u;
+      u.y += dt * u.v;
+      u.z += dt * u.w;
+
+      t   += dt;
+      if (should_save(t, dt, dt_write, tend)) { solution.emplace_back(t, u); }
+    }
+
+    return true;
+  }
+
+  [[nodiscard]] constexpr auto name() const noexcept -> std::string override {
+    return "SymplecticEuler";
+  }
+};
+
+// =================================================================================================
 template <typename Solution>
 auto save_solution(const std::string& filename, const std::vector<Solution>& sol) -> bool {
   static_assert(sizeof(Solution) == 7 * sizeof(double));
@@ -222,15 +292,15 @@ auto save_solution(const std::string& filename, const std::vector<Solution>& sol
 template <template <class State, class RHS> class TI>
 void run(Gravity rhs, State u0, double tend, double dt) {
   TI solver(rhs, u0);
-  const double dt_write = std::max(tend / 500.0, dt);
+  const double dt_write = -1.0;  // std::max(1e-1, dt);
   std::vector<typename TI<State, Gravity>::Solution> sol{};
   sol.emplace_back(0.0, u0);
-  IGOR_TIME_SCOPE(solver.name()) {
-    if (!solver.solve(dt, tend, dt_write, sol)) {
-      Igor::Error("{}-{} failed.", solver.name(), rhs.name());
-      return;
-    }
+  // IGOR_TIME_SCOPE(solver.name()) {
+  if (!solver.solve(dt, tend, dt_write, sol)) {
+    Igor::Error("{}-{} failed.", solver.name(), rhs.name());
+    return;
   }
+  // }
 #pragma omp critical
   {
     Igor::Info("{}", solver.name());
@@ -238,17 +308,12 @@ void run(Gravity rhs, State u0, double tend, double dt) {
         "  pos({:.1e}) = ({:+.6e}, {:+.6e}, {:+.6e})", tend, solver.u.x, solver.u.y, solver.u.z);
     Igor::Info(
         "  vel({:.1e}) = ({:+.6e}, {:+.6e}, {:+.6e})", tend, solver.u.u, solver.u.v, solver.u.w);
-    // Igor::Info("  x({:.1f}) = {:.6e}", tend, solver.u.x);
-    // Igor::Info("  y({:.1f}) = {:.6e}", tend, solver.u.y);
-    // Igor::Info("  z({:.1f}) = {:.6e}", tend, solver.u.z);
-    // Igor::Info("  u({:.1f}) = {:.6e}", tend, solver.u.u);
-    // Igor::Info("  v({:.1f}) = {:.6e}", tend, solver.u.v);
-    // Igor::Info("  w({:.1f}) = {:.6e}", tend, solver.u.w);
+
     const std::string filename = Igor::detail::format("./output/Orbit-{}.npy", solver.name());
     if (!save_solution(filename, sol)) {
-      Igor::Error("Could not save solution to {}", filename);
+      Igor::Error("Could not save solution to `{}`", filename);
     } else {
-      Igor::Info("Saved solution to {}", filename);
+      Igor::Info("Saved solution to `{}`", filename);
     }
     std::cout << '\n';
   }
@@ -266,7 +331,7 @@ auto main() -> int {
       .v = 0.0,
       .w = 0.0,
   };
-  double tend = 1e1;
+  double tend = 2e2;
   double dt   = 1e-1;
 
 #pragma omp parallel
@@ -284,5 +349,7 @@ auto main() -> int {
     run<UPS::ODE::AdamsBashforth>(rhs, u0, tend, dt);
 #pragma omp task
     run<LeapFrog>(rhs, u0, tend, dt);
+#pragma omp task
+    run<SymplecticEuler>(rhs, u0, tend, dt);
   }
 }
