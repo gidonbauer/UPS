@@ -4,6 +4,8 @@
 
 #include "UPS.hpp"
 
+// TODO: Example harmonic oscillator
+
 // = Vector3 =======================================================================================
 struct Vector3 {
   double x, y, z;
