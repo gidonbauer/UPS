@@ -16,9 +16,27 @@ class TimeIntegrator {
   RHS rhs;
 
  public:
+  struct Solution {
+    double t;
+    State u;
+  };
+
   State u;
 
  protected:
+  [[nodiscard]] constexpr auto should_save(double t, double dt, double dt_write, double t_end)
+      -> bool {
+    constexpr double DT_SAFE     = 1e-6;
+    static double last_save_t    = -1.0;
+
+    const bool dt_write_complete = std::fmod(t + DT_SAFE * dt, dt_write) < dt * (1.0 - DT_SAFE);
+    const bool is_last           = std::abs(t - t_end) < DT_SAFE;
+    const bool res               = dt_write_complete || is_last;
+    if (res && is_last && std::abs(t - last_save_t) < DT_SAFE) { return false; }
+    if (res) { last_save_t = t; }
+    return res;
+  }
+
   virtual constexpr auto do_step(double dt) noexcept -> double = 0;
 
  public:
@@ -42,6 +60,24 @@ class TimeIntegrator {
     return true;
   }
 
+  [[nodiscard]] virtual constexpr auto
+  solve(double dt, double tend, double dt_write, std::vector<Solution>& solution) noexcept -> bool {
+    double t = 0.0;
+    while (t < tend) {
+      // #ifndef IGOR_NDEBUG
+      //       if (std::isnan(u) || std::isinf(u)) {
+      //         Igor::Error("Bad solution: u contains NaN or Inf");
+      //         return false;
+      //       }
+      // #endif  // IGOR_NDEBUG
+      dt  = std::min(dt, tend - t);
+      dt  = do_step(dt);
+      t  += dt;
+      if (should_save(t, dt, dt_write, tend)) { solution.emplace_back(t, u); }
+    }
+    return true;
+  }
+
   [[nodiscard]] virtual constexpr auto name() const noexcept -> std::string = 0;
 };
 
@@ -54,6 +90,7 @@ class ExplicitEuler final : public TimeIntegrator<State, RHS> {
  public:
   using TI::solve;
   using TI::u;
+  using typename TI::Solution;
 
  private:
   State dudt{};
@@ -82,6 +119,7 @@ class RungeKutta2 final : public TimeIntegrator<State, RHS> {
  public:
   using TI::solve;
   using TI::u;
+  using typename TI::Solution;
 
  private:
   State dudt{};
@@ -117,6 +155,7 @@ class RungeKutta4 final : public TimeIntegrator<State, RHS> {
  public:
   using TI::solve;
   using TI::u;
+  using typename TI::Solution;
 
  private:
   State u_old{};
@@ -161,6 +200,7 @@ class SemiImplicitCrankNicolson final : public TimeIntegrator<State, RHS> {
  public:
   using TI::solve;
   using TI::u;
+  using typename TI::Solution;
 
  private:
   Index num_subiter;
@@ -201,6 +241,7 @@ class AdamsBashforth final : public TimeIntegrator<State, RHS> {
  public:
   using TI::solve;
   using TI::u;
+  using typename TI::Solution;
 
  private:
   State u_prev{};

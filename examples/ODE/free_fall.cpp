@@ -62,10 +62,11 @@ class FreeFall {
   static constexpr auto name() noexcept -> std::string { return "FreeFall"; }
 };
 
-#define RUN(TI)                                                                                    \
+#define RUN(...)                                                                                   \
   {                                                                                                \
-    TI solver(rhs, Vector2{.x = 0.0, .v = 0.0});                                                   \
-    if (!solver.solve(dt, t_end)) {                                                                \
+    __VA_ARGS__ solver(rhs, Vector2{.x = 0.0, .v = 0.0});                                          \
+    std::vector<__VA_ARGS__::Solution> sol{};                                                      \
+    if (!solver.solve(dt, t_end, dt_write, sol)) {                                                 \
       Igor::Error("{}-{} failed.", solver.name(), rhs.name());                                     \
       return 1;                                                                                    \
     }                                                                                              \
@@ -77,14 +78,15 @@ class FreeFall {
 
 auto main() -> int {
   FreeFall rhs{};
-  const double dt    = 0.5;
-  const double t_end = 3.0;
+  const double dt       = 0.5;
+  const double t_end    = 3.0;
+  const double dt_write = 0.5;
 
-  RUN(UPS::ODE::ExplicitEuler);
-  RUN(UPS::ODE::SemiImplicitCrankNicolson);
-  RUN(UPS::ODE::RungeKutta2);
-  RUN(UPS::ODE::RungeKutta4);
-  RUN(UPS::ODE::AdamsBashforth);
+  RUN(UPS::ODE::ExplicitEuler<Vector2, FreeFall>);
+  RUN(UPS::ODE::SemiImplicitCrankNicolson<Vector2, FreeFall>);
+  RUN(UPS::ODE::RungeKutta2<Vector2, FreeFall>);
+  RUN(UPS::ODE::RungeKutta4<Vector2, FreeFall>);
+  RUN(UPS::ODE::AdamsBashforth<Vector2, FreeFall>);
   Igor::Info("Analytical:");
   Igor::Info("x({:.1f}) = {:.4f}", t_end, u_analytical(t_end).x);
   Igor::Info("v({:.1f}) = {:.4f}", t_end, u_analytical(t_end).v);
