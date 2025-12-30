@@ -1,4 +1,5 @@
-HEADERS = src/Common/Quadrature.hpp \
+HEADERS = src/Common/Definitions.hpp \
+          src/Common/Quadrature.hpp \
           src/Common/QuadratureTables.hpp \
           src/Common/Vector.hpp \
           src/PDE/Advection.hpp \
@@ -16,6 +17,7 @@ TARGETS = examples/PDE/burgers \
           examples/ODE/scaling_ode \
           examples/ODE/free_fall \
           examples/ODE/kepler_orbit \
+          examples/ODE/harmonic_oscillator \
           examples/fma
 
 CXX_FLAGS = -Wall -Wextra -pedantic -Wconversion -Wshadow -std=c++23

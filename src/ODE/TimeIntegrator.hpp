@@ -294,29 +294,20 @@ class LeapFrog final : public UPS::ODE::TimeIntegrator<State, RHS> {
 
     // Half step for velocity
     rhs(u, dt, dudt);
-    u.u += 0.5 * dt * dudt.u;
-    u.v += 0.5 * dt * dudt.v;
-    u.w += 0.5 * dt * dudt.w;
+    u.vel += 0.5 * dt * dudt.vel;
 
     while (t < tend) {
       dt = std::min(dt, tend - t);
 
       rhs(u, dt, dudt);
-      u.u += dt * dudt.u;
-      u.v += dt * dudt.v;
-      u.w += dt * dudt.w;
+      u.vel += dt * dudt.vel;
+      u.pos += dt * u.vel;
 
-      u.x += dt * u.u;
-      u.y += dt * u.v;
-      u.z += dt * u.w;
-
-      t   += dt;
+      t     += dt;
     }
     // Half step backwards for velocity
     rhs(u, dt, dudt);
-    u.u -= 0.5 * dt * dudt.u;
-    u.v -= 0.5 * dt * dudt.v;
-    u.w -= 0.5 * dt * dudt.w;
+    u.vel -= 0.5 * dt * dudt.vel;
 
     return true;
   }
@@ -328,30 +319,21 @@ class LeapFrog final : public UPS::ODE::TimeIntegrator<State, RHS> {
 
     // Half step for velocity
     rhs(u, dt, dudt);
-    u.u += 0.5 * dt * dudt.u;
-    u.v += 0.5 * dt * dudt.v;
-    u.w += 0.5 * dt * dudt.w;
+    u.vel += 0.5 * dt * dudt.vel;
 
     while (t < tend) {
       dt = std::min(dt, tend - t);
 
       rhs(u, dt, dudt);
-      u.u += dt * dudt.u;
-      u.v += dt * dudt.v;
-      u.w += dt * dudt.w;
+      u.vel += dt * dudt.vel;
+      u.pos += dt * u.vel;
 
-      u.x += dt * u.u;
-      u.y += dt * u.v;
-      u.z += dt * u.w;
-
-      t   += dt;
+      t     += dt;
       if (should_save(t, dt, dt_write, tend)) { solution.emplace_back(t, u); }
     }
     // Half step backwards for velocity
     rhs(u, dt, dudt);
-    u.u -= 0.5 * dt * dudt.u;
-    u.v -= 0.5 * dt * dudt.v;
-    u.w -= 0.5 * dt * dudt.w;
+    u.vel -= 0.5 * dt * dudt.vel;
 
     return true;
   }
@@ -386,15 +368,10 @@ class SymplecticEuler final : public UPS::ODE::TimeIntegrator<State, RHS> {
       dt = std::min(dt, tend - t);
 
       rhs(u, dt, dudt);
-      u.u += dt * dudt.u;
-      u.v += dt * dudt.v;
-      u.w += dt * dudt.w;
+      u.vel += dt * dudt.vel;
+      u.pos += dt * u.vel;
 
-      u.x += dt * u.u;
-      u.y += dt * u.v;
-      u.z += dt * u.w;
-
-      t   += dt;
+      t     += dt;
     }
 
     return true;
@@ -408,15 +385,10 @@ class SymplecticEuler final : public UPS::ODE::TimeIntegrator<State, RHS> {
       dt = std::min(dt, tend - t);
 
       rhs(u, dt, dudt);
-      u.u += dt * dudt.u;
-      u.v += dt * dudt.v;
-      u.w += dt * dudt.w;
+      u.vel += dt * dudt.vel;
+      u.pos += dt * u.vel;
 
-      u.x += dt * u.u;
-      u.y += dt * u.v;
-      u.z += dt * u.w;
-
-      t   += dt;
+      t     += dt;
       if (should_save(t, dt, dt_write, tend)) { solution.emplace_back(t, u); }
     }
 

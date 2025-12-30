@@ -1,6 +1,7 @@
 #ifndef UPS_HPP_
 #define UPS_HPP_
 
+#include "Common/Definitions.hpp"
 #include "Common/Quadrature.hpp"
 #include "Common/QuadratureTables.hpp"
 #include "Common/Vector.hpp"
